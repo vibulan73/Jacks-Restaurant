@@ -100,13 +100,18 @@ export default function ContactPage() {
             </div>
 
             {/* Map */}
-            {import.meta.env.VITE_GOOGLE_MAPS_EMBED_URL ? (
+            {import.meta.env.VITE_GOOGLE_MAPS_EMBED_URL?.trim() ? (
               <div className="rounded-xl overflow-hidden border border-white/10 h-60">
                 <iframe
                   title="Jack's Norwood Location"
-                  src={import.meta.env.VITE_GOOGLE_MAPS_EMBED_URL}
-                  width="100%" height="100%" style={{ border: 0 }} allowFullScreen="" loading="lazy"
+                  src={import.meta.env.VITE_GOOGLE_MAPS_EMBED_URL.trim()}
+                  width="100%"
+                  height="100%"
+                  style={{ border: 0 }}
+                  allowFullScreen=""
+                  loading="lazy"
                   referrerPolicy="no-referrer-when-downgrade"
+                  allow="fullscreen"
                 />
               </div>
             ) : (
