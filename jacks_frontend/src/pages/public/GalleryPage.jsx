@@ -41,7 +41,7 @@ export default function GalleryPage() {
   return (
     <div className="min-h-screen pt-20">
       <div className="relative py-24 bg-cover bg-center" style={{ backgroundImage: "url('https://images.unsplash.com/photo-1414235077428-338989a2e8c0?w=1920&q=80')" }}>
-        <div className="absolute inset-0 bg-pub-dark/80" />
+        <div className="absolute inset-0 bg-gradient-to-b from-black/55 via-black/35 to-pub-light/90" />
         <div className="relative z-10 text-center">
           <SectionHeader subtitle="Our Gallery" title="Photo Gallery" description="A glimpse into the Jack's Norwood experience" />
         </div>
@@ -55,7 +55,7 @@ export default function GalleryPage() {
               key={cat}
               onClick={() => setActiveCategory(cat)}
               className={`px-6 py-2 rounded-full text-sm font-semibold uppercase tracking-wider transition-all duration-200 ${
-                activeCategory === cat ? 'bg-pub-gold text-pub-dark' : 'bg-pub-brown/60 text-white/70 hover:bg-pub-gold/20 border border-white/10'
+                activeCategory === cat ? 'bg-pub-gold text-white' : 'bg-white border border-stone-200 text-stone-600 hover:bg-pub-gold/10 hover:border-pub-gold/40'
               }`}
             >
               {cat === 'all' ? 'All Photos' : cat}

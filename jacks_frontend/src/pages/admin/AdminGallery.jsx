@@ -3,6 +3,7 @@ import { useForm } from 'react-hook-form';
 import toast from 'react-hot-toast';
 import { galleryAPI } from '../../services/api';
 import { HiPlus, HiTrash, HiX } from 'react-icons/hi';
+import ImageUpload from '../../components/ui/ImageUpload';
 
 const CATEGORIES = ['food', 'drinks', 'events', 'interior'];
 
@@ -12,15 +13,16 @@ export default function AdminGallery() {
   const [showModal, setShowModal] = useState(false);
   const [filterCat, setFilterCat] = useState('all');
   const { register, handleSubmit, reset, formState: { isSubmitting } } = useForm({ defaultValues: { category: 'food' } });
+  const [imageUrl, setImageUrl] = useState('');
 
   const load = () => galleryAPI.getAll().then(r => setImages(r.data)).catch(console.error).finally(() => setLoading(false));
   useEffect(() => { load(); }, []);
 
   const onSubmit = async (data) => {
     try {
-      await galleryAPI.create(data);
+      await galleryAPI.create({ ...data, imageUrl });
       toast.success('Image added!');
-      setShowModal(false); reset(); load();
+      setShowModal(false); reset(); setImageUrl(''); load();
     } catch { toast.error('Failed to add image'); }
   };
 
@@ -40,7 +42,7 @@ export default function AdminGallery() {
           <h1 className="text-white font-display text-3xl font-bold">Gallery</h1>
           <p className="text-white/40 text-sm mt-1">{images.length} images</p>
         </div>
-        <button onClick={() => setShowModal(true)} className="btn-primary flex items-center gap-2"><HiPlus size={18} /> Add Image</button>
+        <button onClick={() => { setImageUrl(''); setShowModal(true); }} className="btn-primary flex items-center gap-2"><HiPlus size={18} /> Add Image</button>
       </div>
 
       {/* Filters */}
@@ -78,8 +80,7 @@ export default function AdminGallery() {
               <button onClick={() => setShowModal(false)} className="text-white/50 hover:text-white"><HiX size={22} /></button>
             </div>
             <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-              <div><label className="text-white/50 text-xs uppercase tracking-wider mb-1 block">Image URL *</label>
-                <input {...register('imageUrl', { required: true })} placeholder="https://..." className={inputCls} /></div>
+              <ImageUpload value={imageUrl} onChange={setImageUrl} label="Image *" inputCls={inputCls} />
               <div><label className="text-white/50 text-xs uppercase tracking-wider mb-1 block">Category</label>
                 <select {...register('category')} className={inputCls}>
                   {CATEGORIES.map(c => <option key={c} value={c}>{c}</option>)}

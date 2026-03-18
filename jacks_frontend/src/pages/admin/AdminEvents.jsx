@@ -4,6 +4,7 @@ import toast from 'react-hot-toast';
 import { eventAPI } from '../../services/api';
 import { HiPlus, HiPencil, HiTrash, HiX } from 'react-icons/hi';
 import { FaCalendarAlt, FaClock } from 'react-icons/fa';
+import ImageUpload from '../../components/ui/ImageUpload';
 
 const FALLBACK = 'https://images.unsplash.com/photo-1516450360452-9312f5e86fc7?w=300&h=180&fit=crop';
 
@@ -13,14 +14,16 @@ export default function AdminEvents() {
   const [showModal, setShowModal] = useState(false);
   const [editing, setEditing] = useState(null);
   const { register, handleSubmit, reset, setValue, formState: { isSubmitting } } = useForm();
+  const [imageUrl, setImageUrl] = useState('');
 
   const load = () => eventAPI.getAll().then(r => setEvents(r.data)).catch(console.error).finally(() => setLoading(false));
   useEffect(() => { load(); }, []);
 
-  const openAdd = () => { setEditing(null); reset(); setShowModal(true); };
+  const openAdd = () => { setEditing(null); reset(); setImageUrl(''); setShowModal(true); };
   const openEdit = (e) => {
     setEditing(e);
-    ['title','description','imageUrl','reservationLink'].forEach(f => setValue(f, e[f]));
+    ['title','description','reservationLink'].forEach(f => setValue(f, e[f]));
+    setImageUrl(e.imageUrl || '');
     setValue('date', e.date);
     setValue('time', e.time ? e.time.slice(0,5) : '');
     setValue('active', e.active);
@@ -29,8 +32,9 @@ export default function AdminEvents() {
 
   const onSubmit = async (data) => {
     try {
-      if (editing) { await eventAPI.update(editing.id, data); toast.success('Event updated!'); }
-      else { await eventAPI.create(data); toast.success('Event created!'); }
+      const payload = { ...data, imageUrl };
+      if (editing) { await eventAPI.update(editing.id, payload); toast.success('Event updated!'); }
+      else { await eventAPI.create(payload); toast.success('Event created!'); }
       setShowModal(false); reset(); load();
     } catch { toast.error('Failed to save event'); }
   };
@@ -92,8 +96,7 @@ export default function AdminEvents() {
                 <input {...register('title', { required: true })} className={inputCls} /></div>
               <div><label className="text-white/50 text-xs uppercase tracking-wider mb-1 block">Description</label>
                 <textarea {...register('description')} rows={3} className={inputCls + ' resize-none'} /></div>
-              <div><label className="text-white/50 text-xs uppercase tracking-wider mb-1 block">Image URL</label>
-                <input {...register('imageUrl')} placeholder="https://..." className={inputCls} /></div>
+              <ImageUpload value={imageUrl} onChange={setImageUrl} label="Image" inputCls={inputCls} />
               <div className="grid grid-cols-2 gap-4">
                 <div><label className="text-white/50 text-xs uppercase tracking-wider mb-1 block">Date</label>
                   <input type="date" {...register('date')} className={inputCls} /></div>

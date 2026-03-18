@@ -4,10 +4,10 @@ export default function SectionHeader({ subtitle, title, description, light = fa
       {subtitle && (
         <p className="section-subtitle">{subtitle}</p>
       )}
-      <h2 className={`section-title ${light ? 'text-white' : 'text-white'}`}>{title}</h2>
+      <h2 className={`section-title ${light ? 'text-white' : 'text-pub-text'}`}>{title}</h2>
       <div className={`h-0.5 w-16 bg-pub-gold my-4 ${center ? 'mx-auto' : ''}`}></div>
       {description && (
-        <p className={`text-white/60 max-w-2xl ${center ? 'mx-auto' : ''} text-lg leading-relaxed`}>
+        <p className={`${light ? 'text-white/60' : 'text-stone-500'} max-w-2xl ${center ? 'mx-auto' : ''} text-lg leading-relaxed`}>
           {description}
         </p>
       )}

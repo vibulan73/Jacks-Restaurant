@@ -4,8 +4,8 @@ import com.jacksnorwood.jacks_backend.entity.SiteSettings;
 import com.jacksnorwood.jacks_backend.repository.SiteSettingsRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
-import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
@@ -21,13 +21,17 @@ public class SiteSettingsService {
     }
 
     public void update(String key, String value) {
-        repo.save(new SiteSettings(key, value));
+        SiteSettings entity = repo.findById(key).orElse(new SiteSettings(key, ""));
+        entity.setValue(value);
+        repo.save(entity);
     }
 
+    @Transactional
     public void updateAll(Map<String, String> settings) {
-        List<SiteSettings> entities = settings.entrySet().stream()
-                .map(e -> new SiteSettings(e.getKey(), e.getValue()))
-                .collect(Collectors.toList());
-        repo.saveAll(entities);
+        for (Map.Entry<String, String> entry : settings.entrySet()) {
+            SiteSettings entity = repo.findById(entry.getKey()).orElse(new SiteSettings(entry.getKey(), ""));
+            entity.setValue(entry.getValue());
+            repo.save(entity);
+        }
     }
 }

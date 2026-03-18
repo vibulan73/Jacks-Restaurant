@@ -10,9 +10,12 @@ export default {
         pub: {
           dark: '#1a1208',
           brown: '#3d2b1f',
-          gold: '#c8922a',
+          gold: '#b07a1a',
           cream: '#f5e6c8',
           red: '#8b1a1a',
+          light: '#faf5ee',
+          surface: '#ffffff',
+          text: '#2d1a0e',
         }
       },
       fontFamily: {

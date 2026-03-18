@@ -4,6 +4,7 @@ import toast from 'react-hot-toast';
 import { menuAPI } from '../../services/api';
 import { HiPlus, HiPencil, HiTrash, HiX } from 'react-icons/hi';
 import { FaFire, FaLeaf, FaStar } from 'react-icons/fa';
+import ImageUpload from '../../components/ui/ImageUpload';
 
 const FALLBACK = 'https://images.unsplash.com/photo-1414235077428-338989a2e8c0?w=200&h=150&fit=crop';
 
@@ -15,7 +16,10 @@ export default function AdminMenu() {
   const [editing, setEditing] = useState(null);
   const [filterCat, setFilterCat] = useState('all');
 
-  const { register, handleSubmit, reset, setValue, formState: { errors, isSubmitting } } = useForm();
+  const { register, handleSubmit, reset, formState: { errors, isSubmitting } } = useForm();
+  const [imageUrl, setImageUrl] = useState('');
+  const [subcategory, setSubcategory] = useState('');
+  const [isActive, setIsActive] = useState(true);
 
   const load = () => {
     Promise.all([menuAPI.getAll().then(r => setItems(r.data)), menuAPI.getCategories().then(r => setCategories(r.data))])
@@ -24,24 +28,34 @@ export default function AdminMenu() {
 
   useEffect(() => { load(); }, []);
 
-  const openAdd = () => { setEditing(null); reset(); setShowModal(true); };
+  const openAdd = () => {
+    setEditing(null);
+    reset({ isPopular: false, isSpicy: false, isVegan: false });
+    setImageUrl('');
+    setSubcategory('');
+    setIsActive(true);
+    setShowModal(true);
+  };
   const openEdit = (item) => {
     setEditing(item);
-    setValue('name', item.name);
-    setValue('description', item.description);
-    setValue('price', item.price);
-    setValue('imageUrl', item.imageUrl);
-    setValue('categoryId', item.categoryId);
-    setValue('isPopular', item.isPopular);
-    setValue('isSpicy', item.isSpicy);
-    setValue('isVegan', item.isVegan);
-    setValue('isActive', item.isActive);
+    reset({
+      name: item.name,
+      description: item.description || '',
+      price: item.price,
+      categoryId: item.categoryId,
+      isPopular: item.isPopular,
+      isSpicy: item.isSpicy,
+      isVegan: item.isVegan,
+    });
+    setImageUrl(item.imageUrl || '');
+    setSubcategory(item.subcategory || '');
+    setIsActive(item.isActive ?? true);
     setShowModal(true);
   };
 
   const onSubmit = async (data) => {
     try {
-      const payload = { ...data, price: parseFloat(data.price), categoryId: parseInt(data.categoryId) };
+      const payload = { ...data, imageUrl, subcategory, isActive, price: parseFloat(data.price), categoryId: parseInt(data.categoryId) };
       if (editing) {
         await menuAPI.update(editing.id, payload);
         toast.success('Menu item updated!');
@@ -89,6 +103,7 @@ export default function AdminMenu() {
                 <th className="text-left text-white/50 uppercase tracking-wider px-4 py-3 text-xs w-16">Image</th>
                 <th className="text-left text-white/50 uppercase tracking-wider px-4 py-3 text-xs">Name</th>
                 <th className="text-left text-white/50 uppercase tracking-wider px-4 py-3 text-xs hidden md:table-cell">Category</th>
+                <th className="text-left text-white/50 uppercase tracking-wider px-4 py-3 text-xs hidden lg:table-cell">Subcategory</th>
                 <th className="text-left text-white/50 uppercase tracking-wider px-4 py-3 text-xs">Price</th>
                 <th className="text-left text-white/50 uppercase tracking-wider px-4 py-3 text-xs hidden sm:table-cell">Tags</th>
                 <th className="text-left text-white/50 uppercase tracking-wider px-4 py-3 text-xs">Status</th>
@@ -108,6 +123,9 @@ export default function AdminMenu() {
                   </td>
                   <td className="px-4 py-3 hidden md:table-cell">
                     <span className="text-pub-gold text-xs">{item.categoryName}</span>
+                  </td>
+                  <td className="px-4 py-3 hidden lg:table-cell">
+                    <span className="text-white/50 text-xs">{item.subcategory || '—'}</span>
                   </td>
                   <td className="px-4 py-3 text-white font-semibold">${parseFloat(item.price).toFixed(2)}</td>
                   <td className="px-4 py-3 hidden sm:table-cell">
@@ -140,9 +158,21 @@ export default function AdminMenu() {
       {showModal && (
         <div className="fixed inset-0 z-50 bg-black/70 flex items-center justify-center px-4">
           <div className="bg-gray-900 border border-white/10 rounded-2xl p-6 w-full max-w-lg max-h-[90vh] overflow-y-auto">
-            <div className="flex justify-between items-center mb-6">
+            <div className="flex justify-between items-center mb-4">
               <h2 className="font-display text-white text-xl font-bold">{editing ? 'Edit Item' : 'Add Menu Item'}</h2>
-              <button onClick={() => setShowModal(false)} className="text-white/50 hover:text-white"><HiX size={22} /></button>
+              <div className="flex items-center gap-3">
+                <button
+                  type="button"
+                  onClick={() => setIsActive(v => !v)}
+                  className={`flex items-center gap-2 px-4 py-1.5 rounded-full text-sm font-semibold transition-all duration-200 ${
+                    isActive ? 'bg-green-500/20 text-green-400 border border-green-500/40' : 'bg-red-500/20 text-red-400 border border-red-500/40'
+                  }`}
+                >
+                  <span className={`w-2 h-2 rounded-full ${isActive ? 'bg-green-400' : 'bg-red-400'}`} />
+                  {isActive ? 'Active' : 'Inactive'}
+                </button>
+                <button onClick={() => setShowModal(false)} className="text-white/50 hover:text-white"><HiX size={22} /></button>
+              </div>
             </div>
             <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
               <div>
@@ -166,12 +196,18 @@ export default function AdminMenu() {
                   </select>
                 </div>
               </div>
+              <ImageUpload value={imageUrl} onChange={setImageUrl} label="Image" inputCls={inputCls} />
               <div>
-                <label className="text-white/50 text-xs uppercase tracking-wider mb-1 block">Image URL</label>
-                <input {...register('imageUrl')} placeholder="https://..." className={inputCls} />
+                <label className="text-white/50 text-xs uppercase tracking-wider mb-1 block">Subcategory</label>
+                <input
+                  value={subcategory}
+                  onChange={e => setSubcategory(e.target.value)}
+                  placeholder="e.g. Burgers, Starters"
+                  className={inputCls}
+                />
               </div>
               <div className="flex flex-wrap gap-4">
-                {[['isPopular', 'Popular'], ['isSpicy', 'Spicy'], ['isVegan', 'Vegan'], ['isActive', 'Active']].map(([field, label]) => (
+                {[['isPopular', 'Popular'], ['isSpicy', 'Spicy'], ['isVegan', 'Vegan']].map(([field, label]) => (
                   <label key={field} className="flex items-center gap-2 cursor-pointer">
                     <input type="checkbox" {...register(field)} className="w-4 h-4 accent-pub-gold" />
                     <span className="text-white/70 text-sm">{label}</span>

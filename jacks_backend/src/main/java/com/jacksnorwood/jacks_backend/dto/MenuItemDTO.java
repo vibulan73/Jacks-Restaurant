@@ -10,6 +10,7 @@ public class MenuItemDTO {
     private String description;
     private BigDecimal price;
     private String imageUrl;
+    private String subcategory;
     private Long categoryId;
     private String categoryName;
     private Boolean isPopular;

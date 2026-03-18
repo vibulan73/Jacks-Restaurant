@@ -26,6 +26,8 @@ public class MenuItem {
 
     private String imageUrl;
 
+    private String subcategory;
+
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "category_id")
     private MenuCategory category;

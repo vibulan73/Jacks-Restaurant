@@ -25,9 +25,9 @@ export default function EventsPage() {
   return (
     <div className="min-h-screen pt-20">
       <div className="relative py-24 bg-cover bg-center" style={{ backgroundImage: "url('https://images.unsplash.com/photo-1470229538611-16ba8c7ffbd7?w=1920&q=80')" }}>
-        <div className="absolute inset-0 bg-pub-dark/80" />
+        <div className="absolute inset-0 bg-gradient-to-b from-black/55 via-black/35 to-pub-light/90" />
         <div className="relative z-10 text-center">
-          <SectionHeader subtitle="What's On" title="Upcoming Events" description="Live music, trivia nights, sports events and more" />
+          <SectionHeader subtitle="What's On" title="Upcoming Events" description="Live music, trivia nights, sports events and more" light={true} />
         </div>
       </div>
 
@@ -35,7 +35,7 @@ export default function EventsPage() {
         {loading ? (
           <LoadingSpinner />
         ) : events.length === 0 ? (
-          <div className="text-center text-white/50 py-20">
+          <div className="text-center text-stone-400 py-20">
             <p className="text-xl">No upcoming events</p>
             <p className="text-sm mt-2">Stay tuned — something exciting is always in the works!</p>
           </div>
@@ -48,7 +48,7 @@ export default function EventsPage() {
                 whileInView={{ opacity: 1, x: 0 }}
                 viewport={{ once: true }}
                 transition={{ duration: 0.6 }}
-                className="bg-pub-brown/60 border border-white/10 rounded-xl overflow-hidden hover:border-pub-gold/40 transition-all duration-300 group flex flex-col md:flex-row"
+                className="bg-white border border-stone-200 rounded-xl overflow-hidden hover:border-pub-gold/40 hover:shadow-lg transition-all duration-300 group flex flex-col md:flex-row"
               >
                 <div className="md:w-80 h-56 md:h-auto flex-shrink-0 overflow-hidden">
                   <img
@@ -74,8 +74,8 @@ export default function EventsPage() {
                         </div>
                       )}
                     </div>
-                    <h3 className="font-display text-white text-3xl font-bold mb-3">{event.title}</h3>
-                    <p className="text-white/60 leading-relaxed">{event.description}</p>
+                    <h3 className="font-display text-pub-text text-3xl font-bold mb-3">{event.title}</h3>
+                    <p className="text-stone-500 leading-relaxed">{event.description}</p>
                   </div>
                   <div className="mt-6 flex gap-4">
                     {event.reservationLink ? (

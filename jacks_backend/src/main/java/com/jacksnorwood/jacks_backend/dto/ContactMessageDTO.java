@@ -9,6 +9,8 @@ public class ContactMessageDTO {
     private String name;
     private String email;
     private String phone;
+    private String subject;
+    private String cvUrl;
     private String message;
     private LocalDateTime createdAt;
     private Boolean isRead;

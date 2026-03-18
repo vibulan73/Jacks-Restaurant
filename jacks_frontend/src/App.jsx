@@ -4,6 +4,7 @@ import { AuthProvider, useAuth } from './context/AuthContext';
 
 // Public Layout
 import PublicLayout from './components/layout/PublicLayout';
+import ScrollToTop from './components/ui/ScrollToTop';
 
 // Public Pages
 import HomePage from './pages/public/HomePage';
@@ -30,7 +31,7 @@ import AdminSettings from './pages/admin/AdminSettings';
 const ProtectedRoute = ({ children }) => {
   const { user, loading } = useAuth();
   if (loading) return (
-    <div className="min-h-screen bg-pub-dark flex items-center justify-center">
+    <div className="min-h-screen bg-pub-light flex items-center justify-center">
       <div className="text-pub-gold text-xl font-display">Loading...</div>
     </div>
   );
@@ -42,6 +43,7 @@ export default function App() {
   return (
     <AuthProvider>
       <BrowserRouter>
+        <ScrollToTop />
         <Toaster
           position="top-right"
           toastOptions={{
@@ -54,11 +56,11 @@ export default function App() {
             <Route index element={<HomePage />} />
             <Route path="menu" element={<MenuPage />} />
             <Route path="promotions" element={<PromotionsPage />} />
-            <Route path="events" element={<EventsPage />} />
+            <Route path="events" element={<Navigate to="/" replace />} />
             <Route path="gallery" element={<GalleryPage />} />
             <Route path="about" element={<AboutPage />} />
             <Route path="contact" element={<ContactPage />} />
-            <Route path="reservation" element={<ReservationPage />} />
+            <Route path="reservation" element={<Navigate to="/" replace />} />
           </Route>
 
           {/* Admin Routes */}

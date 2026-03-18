@@ -45,6 +45,7 @@ public class MenuService {
         MenuItem item = MenuItem.builder()
                 .name(dto.getName()).description(dto.getDescription())
                 .price(dto.getPrice()).imageUrl(dto.getImageUrl())
+                .subcategory(dto.getSubcategory())
                 .category(category)
                 .isPopular(dto.getIsPopular() != null ? dto.getIsPopular() : false)
                 .isSpicy(dto.getIsSpicy() != null ? dto.getIsSpicy() : false)
@@ -66,6 +67,7 @@ public class MenuService {
         if (dto.getDescription() != null) item.setDescription(dto.getDescription());
         if (dto.getPrice() != null) item.setPrice(dto.getPrice());
         if (dto.getImageUrl() != null) item.setImageUrl(dto.getImageUrl());
+        if (dto.getSubcategory() != null) item.setSubcategory(dto.getSubcategory());
         if (dto.getIsPopular() != null) item.setIsPopular(dto.getIsPopular());
         if (dto.getIsSpicy() != null) item.setIsSpicy(dto.getIsSpicy());
         if (dto.getIsVegan() != null) item.setIsVegan(dto.getIsVegan());
@@ -97,7 +99,8 @@ public class MenuService {
         MenuItemDTO dto = new MenuItemDTO();
         dto.setId(item.getId()); dto.setName(item.getName());
         dto.setDescription(item.getDescription()); dto.setPrice(item.getPrice());
-        dto.setImageUrl(item.getImageUrl()); dto.setIsPopular(item.getIsPopular());
+        dto.setImageUrl(item.getImageUrl()); dto.setSubcategory(item.getSubcategory());
+        dto.setIsPopular(item.getIsPopular());
         dto.setIsSpicy(item.getIsSpicy()); dto.setIsVegan(item.getIsVegan());
         dto.setIsActive(item.getIsActive());
         if (item.getCategory() != null) {

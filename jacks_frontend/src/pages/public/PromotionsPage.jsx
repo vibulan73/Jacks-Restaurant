@@ -9,9 +9,9 @@ import LoadingSpinner from '../../components/ui/LoadingSpinner';
 const FALLBACK = 'https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=800&h=400&fit=crop';
 
 const TABS = [
-  { key: 'ALL',     label: 'All Promotions', icon: FaTag },
-  { key: 'DAILY',   label: 'Daily Promotions', icon: FaSun },
-  { key: 'SPECIAL', label: 'Special Promotions', icon: FaStar },
+  { key: 'ALL',     label: 'All Specials', icon: FaTag },
+  { key: 'DAILY',   label: 'Daily Specials', icon: FaSun },
+  { key: 'SPECIAL', label: 'Featured Specials', icon: FaStar },
 ];
 
 function PromoCard({ promo, index }) {
@@ -23,7 +23,7 @@ function PromoCard({ promo, index }) {
       initial={{ opacity: 0, y: 40 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: index * 0.1, duration: 0.5 }}
-      className="bg-pub-brown/60 border border-white/10 rounded-xl overflow-hidden hover:border-pub-gold/40 transition-all duration-300 group flex flex-col"
+      className="bg-white border border-stone-200 rounded-xl overflow-hidden hover:border-pub-gold/40 hover:shadow-lg transition-all duration-300 group flex flex-col"
     >
       <div className="relative h-52 overflow-hidden">
         <img
@@ -49,15 +49,14 @@ function PromoCard({ promo, index }) {
         )}
       </div>
       <div className="p-6 flex flex-col flex-1">
-        <h3 className="font-display text-white text-2xl font-bold mb-3">{promo.title}</h3>
-        <p className="text-white/60 text-sm leading-relaxed mb-4 flex-1">{promo.description}</p>
+        <h3 className="font-display text-pub-text text-2xl font-bold mb-3">{promo.title}</h3>
+        <p className="text-stone-500 text-sm leading-relaxed mb-4 flex-1">{promo.description}</p>
         {promo.endDate && (
-          <div className="flex items-center gap-2 text-white/40 text-xs mb-4">
+          <div className="flex items-center gap-2 text-stone-400 text-xs mb-4">
             <FaCalendarAlt className="text-pub-gold" />
             <span>Valid until {formatDate(promo.endDate)}</span>
           </div>
         )}
-        <Link to="/reservation" className="btn-primary text-center">Book Now</Link>
       </div>
     </motion.div>
   );
@@ -90,9 +89,9 @@ export default function PromotionsPage() {
   return (
     <div className="min-h-screen pt-20">
       <div className="relative py-24 bg-cover bg-center" style={{ backgroundImage: "url('https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=1920&q=80')" }}>
-        <div className="absolute inset-0 bg-pub-dark/80" />
+        <div className="absolute inset-0 bg-gradient-to-b from-black/55 via-black/35 to-pub-light/90" />
         <div className="relative z-10 text-center">
-          <SectionHeader subtitle="Deals & Specials" title="Current Promotions" description="Take advantage of our exclusive offers" />
+          <SectionHeader subtitle="Deals & Offers" title="Our Specials" description="Take advantage of our exclusive offers" light={true} />
         </div>
       </div>
 
@@ -105,8 +104,8 @@ export default function PromotionsPage() {
               onClick={() => setActiveTab(key)}
               className={`flex items-center gap-2 px-6 py-2.5 rounded-full text-sm font-semibold uppercase tracking-wider transition-all duration-200 ${
                 activeTab === key
-                  ? 'bg-pub-gold text-pub-dark'
-                  : 'bg-pub-brown/60 text-white/70 hover:bg-pub-gold/20 border border-white/10'
+                  ? 'bg-pub-gold text-white'
+                  : 'bg-white text-stone-600 hover:bg-pub-gold/10 border border-stone-200'
               }`}
             >
               <Icon size={14} />
@@ -118,8 +117,8 @@ export default function PromotionsPage() {
         {loading ? (
           <LoadingSpinner />
         ) : filtered.length === 0 ? (
-          <div className="text-center text-white/50 py-20">
-            <p className="text-xl">No active promotions at the moment</p>
+          <div className="text-center text-stone-400 py-20">
+            <p className="text-xl">No active specials at the moment</p>
             <p className="text-sm mt-2">Check back soon for new deals!</p>
           </div>
         ) : (

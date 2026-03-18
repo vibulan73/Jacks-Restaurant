@@ -28,39 +28,96 @@ public class DataInitializer implements CommandLineRunner {
 
     @Override
     public void run(String... args) {
-        // Seed admin user if none exists
+
+        // Admin user
         if (userRepository.count() == 0) {
             userRepository.save(User.builder()
                     .username("admin").password(passwordEncoder.encode("admin123")).role(Role.ADMIN).build());
             log.info("Admin created: admin / admin123");
         }
 
-        // Seed menu categories & items if none exist
+        // Menu categories & items
         if (menuCategoryRepository.count() == 0) {
             log.info("Seeding menu categories and items...");
-            MenuCategory mainMenu = save(cat("Main Menu",  "Our signature mains & classic pub favourites", 1));
-            MenuCategory dessert  = save(cat("Dessert",    "Sweet endings to your meal",                   2));
-            MenuCategory kidsMenu = save(cat("Kids Menu",  "Kid-friendly favourites",                      3));
-            MenuCategory drinks   = save(cat("Drinks",     "Craft beers, cocktails & soft drinks",         4));
 
-            saveItem("Classic Burger",        "Beef patty with lettuce, tomato, pickles and special sauce",      "18.99", mainMenu, true,  false, false);
-            saveItem("BBQ Bacon Burger",      "Smoky BBQ sauce, crispy bacon, cheddar, caramelised onions",      "22.99", mainMenu, true,  false, false);
-            saveItem("Grilled Salmon",        "Atlantic salmon, lemon butter, seasonal vegetables",               "28.99", mainMenu, true,  false, false);
-            saveItem("Spaghetti Bolognese",   "Rich meat sauce with fresh herbs over al dente spaghetti",         "19.99", mainMenu, false, false, false);
-            saveItem("Buffalo Wings",         "Crispy wings in spicy buffalo sauce with blue cheese dip",         "16.99", mainMenu, true,  true,  false);
-            saveItem("Caesar Salad",          "Romaine lettuce, parmesan, croutons, house Caesar dressing",       "12.99", mainMenu, false, false, false);
-            saveItem("Chocolate Lava Cake",   "Warm chocolate cake with vanilla bean ice cream",                  "9.99",  dessert,  true,  false, false);
-            saveItem("Sticky Date Pudding",   "Classic sticky date pudding with butterscotch sauce",              "8.99",  dessert,  false, false, false);
-            saveItem("Cheesecake of the Day", "Ask your server for today's flavour",                              "8.50",  dessert,  false, false, false);
-            saveItem("Kids Burger & Chips",   "Mini beef burger with a side of golden chips",                     "10.99", kidsMenu, true,  false, false);
-            saveItem("Kids Chicken Nuggets",  "Crispy chicken nuggets with tomato sauce & chips",                 "9.99",  kidsMenu, true,  false, false);
-            saveItem("Kids Pasta",            "Pasta with butter and parmesan or napoli sauce",                   "9.50",  kidsMenu, false, false, false);
-            saveItem("Craft Beer (Pint)",     "Rotating local South Australian craft beer selection",             "8.99",  drinks,   false, false, false);
-            saveItem("House Cocktail",        "Ask your server for today's special cocktail",                     "16.00", drinks,   false, false, false);
-            saveItem("Soft Drink",            "Pepsi, Lemonade, Orange Juice or Soda Water",                     "4.50",  drinks,   false, false, false);
+            MenuCategory mainMenu = save(cat("Main Menu", "Our signature mains & classic pub favourites", 1));
+            MenuCategory dessert  = save(cat("Dessert",   "Sweet endings to your meal",                   2));
+            MenuCategory kidsMenu = save(cat("Kids Menu", "Kid-friendly favourites",                      3));
+            MenuCategory drinks   = save(cat("Drinks",    "Craft beers, cocktails, wines & more",         4));
+
+            // --- MAIN MENU / Burgers ---
+            item("Classic Beef Burger",       "Angus beef patty, lettuce, tomato, pickles & special sauce on a brioche bun",  "18.99", mainMenu, "Burgers", true,  false, false);
+            item("BBQ Bacon Burger",          "Smoky BBQ sauce, crispy bacon, aged cheddar & caramelised onions",              "22.99", mainMenu, "Burgers", true,  false, false);
+            item("Crispy Chicken Burger",     "Southern-fried chicken, slaw, pickles & sriracha aioli",                       "21.99", mainMenu, "Burgers", true,  false, false);
+            item("Mushroom Veggie Burger",    "Portobello mushroom, roasted capsicum, haloumi & basil pesto",                  "19.99", mainMenu, "Burgers", false, false, true);
+            item("Double Smash Burger",       "Two smashed patties, American cheese, grilled onions & burger sauce",           "26.99", mainMenu, "Burgers", false, false, false);
+
+            // --- MAIN MENU / Steaks ---
+            item("250g Scotch Fillet",        "Grass-fed scotch fillet with chips, salad & your choice of sauce",              "38.99", mainMenu, "Steaks",  true,  false, false);
+            item("300g Ribeye",               "Slow-aged ribeye, bone marrow butter, roasted garlic & seasonal vegetables",    "44.99", mainMenu, "Steaks",  true,  false, false);
+            item("400g T-Bone",               "Impressive T-bone, hand-cut chips & peppercorn sauce",                          "48.99", mainMenu, "Steaks",  false, false, false);
+
+            // --- MAIN MENU / Mains ---
+            item("Grilled Atlantic Salmon",   "Atlantic salmon, lemon butter, broccolini & herb mash",                        "32.99", mainMenu, "Mains",   true,  false, false);
+            item("Chicken Schnitzel",         "Golden crumbed schnitzel with chips, salad & house gravy",                     "23.99", mainMenu, "Mains",   true,  false, false);
+            item("Lamb Shank",                "Slow-braised lamb shank, creamy polenta & red wine jus",                       "34.99", mainMenu, "Mains",   false, false, false);
+            item("Spaghetti Bolognese",       "Rich slow-cooked meat sauce with fresh herbs over al dente spaghetti",         "19.99", mainMenu, "Mains",   false, false, false);
+            item("Barramundi & Chips",        "Beer-battered barramundi, thick-cut chips & house tartare",                    "27.99", mainMenu, "Mains",   false, false, false);
+
+            // --- MAIN MENU / Starters ---
+            item("Buffalo Wings (1kg)",       "Crispy wings tossed in spicy buffalo sauce with blue cheese dip",               "22.99", mainMenu, "Starters", true,  true,  false);
+            item("Calamari",                  "Golden calamari rings with lemon aioli & mixed leaves",                        "14.99", mainMenu, "Starters", false, false, false);
+            item("Garlic Bread",              "Toasted sourdough with house garlic butter & fresh parsley",                    "7.99",  mainMenu, "Starters", false, false, true);
+            item("Loaded Nachos",             "House tortilla chips, cheese, jalapeños, guacamole, sour cream & salsa",       "16.99", mainMenu, "Starters", true,  true,  false);
+            item("Caesar Salad",              "Baby romaine, parmesan, house croutons & classic Caesar dressing",              "14.99", mainMenu, "Starters", false, false, false);
+            item("Soup of the Day",           "Ask your server for today's house-made soup, served with bread",                "10.99", mainMenu, "Starters", false, false, false);
+
+            // --- DESSERT ---
+            item("Chocolate Lava Cake",       "Warm dark chocolate fondant with vanilla bean ice cream",                       "10.99", dessert, null, true,  false, false);
+            item("Sticky Date Pudding",       "Classic sticky date pudding with butterscotch sauce & cream",                   "9.99",  dessert, null, true,  false, false);
+            item("Cheesecake of the Day",     "Ask your server for today's freshly made flavour",                              "9.50",  dessert, null, false, false, false);
+            item("Pavlova",                   "House pavlova with seasonal fruit, cream & passionfruit coulis",                "10.50", dessert, null, false, false, false);
+            item("Ice Cream (3 Scoops)",      "Choice of vanilla, chocolate or strawberry with waffle cone",                   "7.99",  dessert, null, false, false, false);
+            item("Tiramisu",                  "Classic Italian tiramisu with mascarpone & espresso-soaked sponge",             "10.99", dessert, null, false, false, false);
+
+            // --- KIDS MENU ---
+            item("Kids Burger & Chips",       "Mini beef burger with golden chips & tomato sauce",                             "10.99", kidsMenu, null, true,  false, false);
+            item("Kids Chicken Nuggets",      "Crispy nuggets with chips & tomato sauce",                                     "9.99",  kidsMenu, null, true,  false, false);
+            item("Kids Fish & Chips",         "Battered fish bites with chips & tartare sauce",                                "10.50", kidsMenu, null, false, false, false);
+            item("Kids Pasta",                "Pasta with butter & parmesan or napoli sauce",                                  "9.50",  kidsMenu, null, false, false, false);
+            item("Kids Cheese Pizza",         "Mini cheese pizza on a thin base with tomato sauce",                            "9.99",  kidsMenu, null, false, false, false);
+            item("Kids Sausages & Mash",      "Two beef sausages with creamy mash & gravy",                                   "9.99",  kidsMenu, null, false, false, false);
+
+            // --- DRINKS / Beers ---
+            item("Coopers Pale Ale (Pint)",   "South Australia's finest — smooth, hoppy & refreshing",                        "8.99",  drinks, "Beers", false, false, false);
+            item("Hahn Super Dry (Pint)",     "Light & crisp lager, easy drinking",                                           "7.99",  drinks, "Beers", false, false, false);
+            item("Pirate Life IPA (Pint)",    "Locally brewed Adelaide IPA — bold hops & citrus notes",                       "9.99",  drinks, "Beers", true,  false, false);
+            item("Guinness (Pint)",           "Classic Irish stout, perfectly poured",                                        "9.99",  drinks, "Beers", false, false, false);
+            item("Craft Beer of the Month",   "Ask your server for our rotating local craft selection",                        "10.99", drinks, "Beers", true,  false, false);
+
+            // --- DRINKS / Cocktails ---
+            item("Espresso Martini",          "Vodka, Kahlúa, fresh espresso & simple syrup",                                 "18.00", drinks, "Cocktails", true,  false, false);
+            item("Aperol Spritz",             "Aperol, prosecco, soda & a slice of orange",                                   "16.00", drinks, "Cocktails", true,  false, false);
+            item("Old Fashioned",             "Bourbon, Angostura bitters, orange zest & sugar",                              "18.00", drinks, "Cocktails", false, false, false);
+            item("Mojito",                    "White rum, fresh mint, lime, sugar & soda",                                    "16.00", drinks, "Cocktails", false, false, false);
+            item("Margarita",                 "Tequila, triple sec, fresh lime & salt rim",                                   "17.00", drinks, "Cocktails", false, false, false);
+            item("Cocktail of the Day",       "Ask your server for our house special creation",                                "16.00", drinks, "Cocktails", false, false, false);
+
+            // --- DRINKS / Wines ---
+            item("House Red (Glass)",         "Smooth Barossa Valley Shiraz — fruit-forward & medium bodied",                  "10.00", drinks, "Wines", false, false, false);
+            item("House White (Glass)",       "Crisp Adelaide Hills Sauvignon Blanc",                                         "10.00", drinks, "Wines", false, false, false);
+            item("House Rosé (Glass)",        "Dry McLaren Vale rosé with hints of strawberry & peach",                       "10.00", drinks, "Wines", false, false, false);
+            item("Sparkling (Glass)",         "Yalumba Prosecco — light & refreshing",                                        "11.00", drinks, "Wines", false, false, false);
+
+            // --- DRINKS / Soft Drinks ---
+            item("Soft Drink (Can)",          "Pepsi, Lemonade, Solo or Soda Water",                                          "4.50",  drinks, "Soft Drinks", false, false, false);
+            item("Fresh Orange Juice",        "Freshly squeezed orange juice",                                                 "6.50",  drinks, "Soft Drinks", false, false, false);
+            item("Milkshake",                 "Chocolate, vanilla or strawberry — thick & creamy",                            "8.00",  drinks, "Soft Drinks", false, false, false);
+            item("Sparkling Water (500ml)",   "San Pellegrino sparkling mineral water",                                        "5.00",  drinks, "Soft Drinks", false, false, false);
+            item("Lemon Lime & Bitters",      "Classic Australian pub refresher",                                              "5.50",  drinks, "Soft Drinks", true,  false, false);
         }
 
-        // Seed promotions if none exist
+        // Promotions
         if (promotionRepository.count() == 0) {
             log.info("Seeding promotions...");
             promotionRepository.save(Promotion.builder().title("Happy Hour")
@@ -71,17 +128,25 @@ public class DataInitializer implements CommandLineRunner {
                     .description("Any main meal + soft drink for a great value price, available Mon–Fri 11 AM – 3 PM.")
                     .discount("$18.99 Combo").startDate(LocalDate.now()).endDate(LocalDate.now().plusMonths(6))
                     .active(true).promotionType(PromotionType.DAILY).build());
+            promotionRepository.save(Promotion.builder().title("Steak Night Thursday")
+                    .description("Every Thursday — 250g scotch fillet, chips, salad & a glass of house red or white.")
+                    .discount("$35.00").startDate(LocalDate.now()).endDate(LocalDate.now().plusMonths(6))
+                    .active(true).promotionType(PromotionType.DAILY).build());
             promotionRepository.save(Promotion.builder().title("Weekend Brunch Special")
-                    .description("Free dessert with every main meal on Saturday and Sunday brunch. Treat yourself!")
+                    .description("Free dessert with every main meal on Saturday and Sunday. Treat yourself!")
                     .discount("FREE Dessert").startDate(LocalDate.now()).endDate(LocalDate.now().plusMonths(2))
                     .active(true).promotionType(PromotionType.SPECIAL).build());
             promotionRepository.save(Promotion.builder().title("Family Feast")
                     .description("Feed the whole family! 2 mains, 2 kids meals and a shared dessert for a special price.")
                     .discount("$69.99 Bundle").startDate(LocalDate.now()).endDate(LocalDate.now().plusMonths(3))
                     .active(true).promotionType(PromotionType.SPECIAL).build());
+            promotionRepository.save(Promotion.builder().title("Wings Wednesday")
+                    .description("1kg buffalo wings + a pint of beer every Wednesday. The perfect midweek treat.")
+                    .discount("$29.99").startDate(LocalDate.now()).endDate(LocalDate.now().plusMonths(6))
+                    .active(true).promotionType(PromotionType.DAILY).build());
         }
 
-        // Seed events if none exist
+        // Events
         if (eventRepository.count() == 0) {
             log.info("Seeding events...");
             eventRepository.save(Event.builder().title("Live Music Friday")
@@ -98,18 +163,17 @@ public class DataInitializer implements CommandLineRunner {
                     .date(LocalDate.now().plusDays(8)).time(LocalTime.of(21, 0)).active(true).build());
         }
 
-        // Seed gallery if none exist
+        // Gallery
         if (galleryRepository.count() == 0) {
             log.info("Seeding gallery...");
-            String[] foodImgs = {
-                "https://images.unsplash.com/photo-1414235077428-338989a2e8c0?w=800",
-                "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=800",
-                "https://images.unsplash.com/photo-1555939594-58d7cb561ad1?w=800",
-                "https://images.unsplash.com/photo-1551782450-a2132b4ba21d?w=800"
+            String[][] food = {
+                {"https://images.unsplash.com/photo-1414235077428-338989a2e8c0?w=800", "Signature Burger"},
+                {"https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=800",    "Fresh Salad"},
+                {"https://images.unsplash.com/photo-1555939594-58d7cb561ad1?w=800",    "Grilled Salmon"},
+                {"https://images.unsplash.com/photo-1551782450-a2132b4ba21d?w=800",    "BBQ Wings"},
             };
-            String[] foodCaps = {"Signature Burger", "Fresh Salad", "Grilled Salmon", "BBQ Wings"};
-            for (int i = 0; i < foodImgs.length; i++)
-                galleryRepository.save(Gallery.builder().imageUrl(foodImgs[i]).category("food").caption(foodCaps[i]).displayOrder(i+1).build());
+            for (int i = 0; i < food.length; i++)
+                galleryRepository.save(Gallery.builder().imageUrl(food[i][0]).category("food").caption(food[i][1]).displayOrder(i + 1).build());
 
             galleryRepository.save(Gallery.builder().imageUrl("https://images.unsplash.com/photo-1514362545857-3bc16c4c7d1b?w=800").category("drinks").caption("Craft Cocktails").displayOrder(5).build());
             galleryRepository.save(Gallery.builder().imageUrl("https://images.unsplash.com/photo-1571091718767-18b5b1457add?w=800").category("drinks").caption("Cold Beers on Tap").displayOrder(6).build());
@@ -119,11 +183,11 @@ public class DataInitializer implements CommandLineRunner {
             galleryRepository.save(Gallery.builder().imageUrl("https://images.unsplash.com/photo-1590846406792-0adc7f938f1d?w=800").category("interior").caption("Dining Room").displayOrder(10).build());
         }
 
-        // Seed site settings if none exist
+        // Site settings
         if (siteSettingsRepository.count() == 0) {
-            siteSettingsRepository.save(new SiteSettings("social.facebook", ""));
+            siteSettingsRepository.save(new SiteSettings("social.facebook",  ""));
             siteSettingsRepository.save(new SiteSettings("social.instagram", ""));
-            siteSettingsRepository.save(new SiteSettings("social.tiktok", ""));
+            siteSettingsRepository.save(new SiteSettings("social.tiktok",    ""));
         }
     }
 
@@ -133,10 +197,11 @@ public class DataInitializer implements CommandLineRunner {
         return MenuCategory.builder().name(name).description(desc).displayOrder(order).build();
     }
 
-    private void saveItem(String name, String desc, String price, MenuCategory cat,
-                          boolean popular, boolean spicy, boolean vegan) {
+    private void item(String name, String desc, String price, MenuCategory cat,
+                      String subcategory, boolean popular, boolean spicy, boolean vegan) {
         menuItemRepository.save(MenuItem.builder()
                 .name(name).description(desc).price(new BigDecimal(price))
-                .category(cat).isPopular(popular).isSpicy(spicy).isVegan(vegan).isActive(true).build());
+                .category(cat).subcategory(subcategory)
+                .isPopular(popular).isSpicy(spicy).isVegan(vegan).isActive(true).build());
     }
 }

@@ -19,9 +19,11 @@ export default function AdminSettings() {
       .then(r => {
         const data = r.data;
         reset({
-          'social.facebook':  data['social.facebook']  || '',
-          'social.instagram': data['social.instagram'] || '',
-'social.tiktok':    data['social.tiktok']    || '',
+          social: {
+            facebook: data['social.facebook']  || '',
+            instagram: data['social.instagram'] || '',
+            tiktok:   data['social.tiktok']    || '',
+          },
         });
       })
       .catch(() => toast.error('Failed to load settings'));
@@ -29,7 +31,13 @@ export default function AdminSettings() {
 
   const onSubmit = async (data) => {
     try {
-      await settingsAPI.updateAll(data);
+      // react-hook-form converts dotted names to nested objects — flatten manually
+      const payload = {};
+      SOCIAL_FIELDS.forEach(({ key }) => {
+        const parts = key.split('.');
+        payload[key] = parts.reduce((obj, k) => obj?.[k], data) || '';
+      });
+      await settingsAPI.updateAll(payload);
       toast.success('Settings saved!');
       reset(data); // Mark form as clean
     } catch {

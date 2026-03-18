@@ -23,6 +23,10 @@ public class ContactMessage {
 
     private String phone;
 
+    private String subject;
+
+    private String cvUrl;
+
     @Column(length = 2000, nullable = false)
     private String message;
 

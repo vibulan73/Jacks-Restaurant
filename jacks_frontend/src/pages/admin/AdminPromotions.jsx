@@ -4,6 +4,7 @@ import toast from 'react-hot-toast';
 import { promotionAPI } from '../../services/api';
 import { HiPlus, HiPencil, HiTrash, HiX } from 'react-icons/hi';
 import { FaSun, FaStar } from 'react-icons/fa';
+import ImageUpload from '../../components/ui/ImageUpload';
 
 const FALLBACK = 'https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=200&h=120&fit=crop';
 
@@ -12,26 +13,40 @@ export default function AdminPromotions() {
   const [loading, setLoading] = useState(true);
   const [showModal, setShowModal] = useState(false);
   const [editing, setEditing] = useState(null);
-  const { register, handleSubmit, reset, setValue, formState: { isSubmitting } } = useForm();
+  const { register, handleSubmit, reset, formState: { isSubmitting } } = useForm();
+  const [imageUrl, setImageUrl] = useState('');
+  const [active, setActive] = useState(true);
 
   const load = () => promotionAPI.getAll().then(r => setPromotions(r.data)).catch(console.error).finally(() => setLoading(false));
   useEffect(() => { load(); }, []);
 
-  const openAdd = () => { setEditing(null); reset(); setShowModal(true); };
+  const openAdd = () => {
+    setEditing(null);
+    reset({ promotionType: 'SPECIAL' });
+    setImageUrl('');
+    setActive(true);
+    setShowModal(true);
+  };
   const openEdit = (p) => {
     setEditing(p);
-    ['title','description','imageUrl','discount'].forEach(f => setValue(f, p[f]));
-    setValue('startDate', p.startDate);
-    setValue('endDate', p.endDate);
-    setValue('active', p.active);
-    setValue('promotionType', p.promotionType || 'SPECIAL');
+    reset({
+      title: p.title,
+      description: p.description || '',
+      discount: p.discount || '',
+      startDate: p.startDate || '',
+      endDate: p.endDate || '',
+      promotionType: p.promotionType || 'SPECIAL',
+    });
+    setImageUrl(p.imageUrl || '');
+    setActive(p.active ?? true);
     setShowModal(true);
   };
 
   const onSubmit = async (data) => {
     try {
-      if (editing) { await promotionAPI.update(editing.id, data); toast.success('Promotion updated!'); }
-      else { await promotionAPI.create(data); toast.success('Promotion created!'); }
+      const payload = { ...data, imageUrl, active };
+      if (editing) { await promotionAPI.update(editing.id, payload); toast.success('Promotion updated!'); }
+      else { await promotionAPI.create(payload); toast.success('Promotion created!'); }
       setShowModal(false); reset(); load();
     } catch { toast.error('Failed to save promotion'); }
   };
@@ -92,9 +107,21 @@ export default function AdminPromotions() {
       {showModal && (
         <div className="fixed inset-0 z-50 bg-black/70 flex items-center justify-center px-4">
           <div className="bg-gray-900 border border-white/10 rounded-2xl p-6 w-full max-w-lg max-h-[90vh] overflow-y-auto">
-            <div className="flex justify-between items-center mb-6">
+            <div className="flex justify-between items-center mb-4">
               <h2 className="font-display text-white text-xl font-bold">{editing ? 'Edit Promotion' : 'New Promotion'}</h2>
-              <button onClick={() => setShowModal(false)} className="text-white/50 hover:text-white"><HiX size={22} /></button>
+              <div className="flex items-center gap-3">
+                <button
+                  type="button"
+                  onClick={() => setActive(v => !v)}
+                  className={`flex items-center gap-2 px-4 py-1.5 rounded-full text-sm font-semibold transition-all duration-200 ${
+                    active ? 'bg-green-500/20 text-green-400 border border-green-500/40' : 'bg-red-500/20 text-red-400 border border-red-500/40'
+                  }`}
+                >
+                  <span className={`w-2 h-2 rounded-full ${active ? 'bg-green-400' : 'bg-red-400'}`} />
+                  {active ? 'Active' : 'Inactive'}
+                </button>
+                <button onClick={() => setShowModal(false)} className="text-white/50 hover:text-white"><HiX size={22} /></button>
+              </div>
             </div>
             <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
               <div><label className="text-white/50 text-xs uppercase tracking-wider mb-1 block">Title *</label>
@@ -109,18 +136,13 @@ export default function AdminPromotions() {
               </div>
               <div><label className="text-white/50 text-xs uppercase tracking-wider mb-1 block">Discount Text</label>
                 <input {...register('discount')} placeholder="e.g. 50% OFF" className={inputCls} /></div>
-              <div><label className="text-white/50 text-xs uppercase tracking-wider mb-1 block">Image URL</label>
-                <input {...register('imageUrl')} placeholder="https://..." className={inputCls} /></div>
+              <ImageUpload value={imageUrl} onChange={setImageUrl} label="Image" inputCls={inputCls} />
               <div className="grid grid-cols-2 gap-4">
                 <div><label className="text-white/50 text-xs uppercase tracking-wider mb-1 block">Start Date</label>
                   <input type="date" {...register('startDate')} className={inputCls} /></div>
                 <div><label className="text-white/50 text-xs uppercase tracking-wider mb-1 block">End Date</label>
                   <input type="date" {...register('endDate')} className={inputCls} /></div>
               </div>
-              <label className="flex items-center gap-2 cursor-pointer">
-                <input type="checkbox" {...register('active')} className="w-4 h-4 accent-pub-gold" />
-                <span className="text-white/70 text-sm">Active</span>
-              </label>
               <div className="flex gap-3 pt-2">
                 <button type="button" onClick={() => setShowModal(false)} className="flex-1 border border-white/20 text-white/70 py-2.5 rounded-lg hover:bg-white/5 text-sm">Cancel</button>
                 <button type="submit" disabled={isSubmitting} className="flex-1 btn-primary disabled:opacity-50 text-sm">{isSubmitting ? 'Saving...' : 'Save'}</button>
