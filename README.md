@@ -198,31 +198,56 @@ Links appear in the website footer. Icons are only shown for platforms that have
 
 ### Frontend (`jacks_frontend/.env`)
 
-| Variable | Description |
-|----------|-------------|
-| `VITE_API_BASE_URL` | Backend API base URL |
-| `VITE_RESTAURANT_NAME` | Restaurant name |
-| `VITE_RESTAURANT_PHONE` | Contact phone number |
-| `VITE_RESTAURANT_EMAIL` | Contact email address |
-| `VITE_RESTAURANT_ADDRESS` | Physical address |
-| `VITE_GOOGLE_MAPS_EMBED_URL` | Google Maps embed src URL |
+| Variable | Required | Default | Description |
+|----------|----------|---------|-------------|
+| `VITE_API_BASE_URL` | ✅ Yes | — | Backend API base URL, e.g. `http://localhost:8080/api`. Change to your server URL in production. |
+| `VITE_RESTAURANT_NAME` | ✅ Yes | — | Restaurant name shown in the browser tab, SEO meta tags, and page headings. |
+| `VITE_RESTAURANT_PHONE` | ✅ Yes | — | Contact phone number shown in the header, footer, and contact page. |
+| `VITE_RESTAURANT_EMAIL` | ✅ Yes | — | Contact email address shown on the contact page. |
+| `VITE_RESTAURANT_ADDRESS` | ✅ Yes | — | Physical street address shown in the footer and contact page. |
+| `VITE_GOOGLE_MAPS_EMBED_URL` | Optional | — | Google Maps embed `src` URL. If left empty, a plain "View on Google Maps" link is shown instead. See the [Adding a Google Map](#adding-a-google-map) section for how to get this URL. |
+| `VITE_HERO_IMAGE_URL` | Optional | Bundled image | Fallback hero background image. Leave empty to use the default bundled image. Set to a `/uploads/...` path to use a custom image. Note: hero images uploaded via the Admin → Hero Images page take priority over this value. |
 
 ### Backend (`jacks_backend/.env`)
 
-| Variable | Description |
-|----------|-------------|
-| `DB_HOST` | PostgreSQL host |
-| `DB_PORT` | PostgreSQL port |
-| `DB_NAME` | Database name |
-| `DB_USERNAME` | Database username |
-| `DB_PASSWORD` | Database password |
-| `JWT_SECRET` | Secret key for JWT signing (min 256 bits) |
-| `JWT_EXPIRATION` | Token expiry in milliseconds (default: 86400000 = 24h) |
-| `CORS_ALLOWED_ORIGINS` | Frontend origin allowed by CORS |
-| `MAIL_HOST` | SMTP host for contact form emails |
-| `MAIL_PORT` | SMTP port |
-| `MAIL_USERNAME` | SMTP username / sender email |
-| `MAIL_PASSWORD` | SMTP password or app password |
+#### Database
+
+| Variable | Required | Default | Description |
+|----------|----------|---------|-------------|
+| `DB_HOST` | ✅ Yes | `localhost` | PostgreSQL server hostname. |
+| `DB_PORT` | ✅ Yes | `5432` | PostgreSQL port. |
+| `DB_NAME` | ✅ Yes | `jacksnorwood` | Name of the PostgreSQL database. |
+| `DB_USERNAME` | ✅ Yes | `postgres` | PostgreSQL login username. |
+| `DB_PASSWORD` | ✅ Yes | — | PostgreSQL login password. |
+
+#### JWT Authentication
+
+| Variable | Required | Default | Description |
+|----------|----------|---------|-------------|
+| `JWT_SECRET` | ✅ Yes | — | Secret key used to sign JWT tokens. Must be at least 256 bits (32+ characters). Use a long random string in production — never share this value. |
+| `JWT_EXPIRATION` | Optional | `86400000` | How long a JWT token stays valid, in milliseconds. Default is `86400000` (24 hours). |
+
+#### CORS
+
+| Variable | Required | Default | Description |
+|----------|----------|---------|-------------|
+| `CORS_ALLOWED_ORIGINS` | ✅ Yes | `http://localhost:5173` | The frontend URL that the backend allows requests from. In production, set this to your deployed frontend URL (e.g. `https://yoursite.com`). |
+
+#### Email (SMTP)
+
+| Variable | Required | Default | Description |
+|----------|----------|---------|-------------|
+| `MAIL_HOST` | ✅ Yes | `smtp.gmail.com` | SMTP server hostname. For Gmail use `smtp.gmail.com`. |
+| `MAIL_PORT` | ✅ Yes | `587` | SMTP port. Use `587` for STARTTLS (Gmail). |
+| `MAIL_USERNAME` | ✅ Yes | — | The Gmail (or other provider) address used to send emails, e.g. `yourname@gmail.com`. |
+| `MAIL_PASSWORD` | ✅ Yes | — | The SMTP password. For Gmail, create a 16-character **App Password** (not your regular Gmail password) at [myaccount.google.com/apppasswords](https://myaccount.google.com/apppasswords). |
+| `RESTAURANT_EMAIL` | ✅ Yes | — | The restaurant's own email address that receives contact form submissions. This is the **destination** inbox — different from `MAIL_USERNAME` which is the sender. |
+
+#### Spring Profile
+
+| Variable | Required | Default | Description |
+|----------|----------|---------|-------------|
+| `SPRING_PROFILES_ACTIVE` | Optional | `dev` | Controls which Spring profile is active. Use `dev` locally (auto-seeds the database with sample data on first boot). Use `prod` in production (skips the DataInitializer so real data is never overwritten on restart). |
 
 ---
 
