@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import toast from 'react-hot-toast';
-import { galleryAPI, uploadAPI } from '../../services/api';
+import { galleryAPI, uploadAPI, resolveImageUrl } from '../../services/api';
 import { HiPlus, HiTrash, HiX } from 'react-icons/hi';
 import { FaUpload } from 'react-icons/fa';
 
@@ -112,7 +112,7 @@ export default function AdminGallery() {
         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
           {filtered.map(img => (
             <div key={img.id} className="group relative rounded-xl overflow-hidden bg-gray-900 aspect-square">
-              <img src={img.imageUrl} alt={img.caption || 'Gallery'} className="w-full h-full object-cover" loading="lazy" />
+              <img src={resolveImageUrl(img.imageUrl)} alt={img.caption || 'Gallery'} className="w-full h-full object-cover" loading="lazy" />
               <div className="absolute inset-0 bg-pub-dark/0 group-hover:bg-pub-dark/70 transition-all duration-300 flex flex-col items-center justify-center gap-2 opacity-0 group-hover:opacity-100">
                 <span className="text-white text-xs text-center px-2">{img.caption}</span>
                 <span className="text-pub-gold text-xs uppercase">{img.category}</span>

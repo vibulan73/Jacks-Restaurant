@@ -9,8 +9,11 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
+
+
 
 @Service
 @RequiredArgsConstructor
@@ -19,21 +22,42 @@ public class PromotionService {
     private final PromotionRepository promotionRepository;
     private final NewsletterService newsletterService;
 
+    private static final List<String> DAY_ORDER =
+            List.of("Monday","Tuesday","Wednesday","Thursday","Friday","Saturday","Sunday");
+
+    private Comparator<Promotion> byDateTime() {
+        return Comparator
+                // DAILY first, then SPECIAL
+                .comparingInt((Promotion p) -> p.getPromotionType() == PromotionType.DAILY ? 0 : 1)
+                // Within DAILY: by day-of-week order (Mon → Sun)
+                .thenComparingInt(p -> {
+                    if (p.getPromotionType() != PromotionType.DAILY) return 0;
+                    int idx = p.getDayOfWeek() != null ? DAY_ORDER.indexOf(p.getDayOfWeek()) : -1;
+                    return idx < 0 ? DAY_ORDER.size() : idx;
+                })
+                // Within SPECIAL: by startDateTime ascending (nulls last)
+                .thenComparing(p ->
+                        p.getStartDateTime() != null ? p.getStartDateTime() : LocalDateTime.MAX
+                );
+    }
+
     public List<PromotionDTO> getActivePromotions() {
         LocalDateTime now = LocalDateTime.now();
         return promotionRepository.findByActiveTrue().stream()
                 .filter(p -> {
                     if (p.getPromotionType() == PromotionType.DAILY) return true;
-                    // SPECIAL: respect startDateTime / endDateTime window
                     boolean afterStart = p.getStartDateTime() == null || !now.isBefore(p.getStartDateTime());
                     boolean beforeEnd  = p.getEndDateTime()   == null || !now.isAfter(p.getEndDateTime());
                     return afterStart && beforeEnd;
                 })
+                .sorted(byDateTime())
                 .map(this::toDTO).collect(Collectors.toList());
     }
 
     public List<PromotionDTO> getAllPromotions() {
-        return promotionRepository.findAll().stream().map(this::toDTO).collect(Collectors.toList());
+        return promotionRepository.findAll().stream()
+                .sorted(byDateTime())
+                .map(this::toDTO).collect(Collectors.toList());
     }
 
     public PromotionDTO create(PromotionDTO dto) {
@@ -53,7 +77,7 @@ public class PromotionService {
             String typeLabel = type == PromotionType.DAILY ? "Daily Special" : "Special";
             String body = saved.getDescription() != null && !saved.getDescription().isBlank()
                     ? saved.getDescription() : "Visit us to find out more!";
-            newsletterService.notifySubscribers("New " + typeLabel + ": " + saved.getTitle(), body);
+            newsletterService.notifySubscribers("New " + typeLabel + ": " + saved.getTitle(), body, saved.getImageUrl());
         } catch (Exception ignored) {}
         return saved;
     }

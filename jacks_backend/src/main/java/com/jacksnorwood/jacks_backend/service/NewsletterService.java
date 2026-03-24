@@ -71,9 +71,25 @@ public class NewsletterService {
         }
     }
 
-    public void notifySubscribers(String subject, String body) {
+    public void notifySubscribers(String subject, String body, String imageUrl) {
         List<NewsletterSubscriber> subscribers = repo.findAll();
         if (subscribers.isEmpty() || senderEmail == null || senderEmail.isBlank()) return;
+
+        // Resolve image file if provided
+        File imageFile = null;
+        if (imageUrl != null && !imageUrl.isBlank()) {
+            String filename = imageUrl.replaceFirst("^/uploads/", "");
+            imageFile = new File(uploadDir).toPath().toAbsolutePath().resolve(filename).toFile();
+            if (!imageFile.exists()) {
+                log.warn("Notification image not found: {}", imageFile.getAbsolutePath());
+                imageFile = null;
+            }
+        }
+        final File finalImageFile = imageFile;
+
+        String imgHtml = finalImageFile != null
+                ? "<img src='cid:notify-img' style='width:100%;max-width:560px;border-radius:8px;margin:16px 0;display:block;'/>"
+                : "";
         String htmlBody =
             "<!DOCTYPE html><html><body style='margin:0;padding:0;background:#f5f5f4;font-family:Arial,sans-serif;'>" +
             "<div style='max-width:600px;margin:32px auto;background:#fff;border-radius:12px;overflow:hidden;box-shadow:0 2px 12px rgba(0,0,0,.08);'>" +
@@ -81,10 +97,12 @@ public class NewsletterService {
             "<h1 style='color:#c8922a;margin:0;font-size:22px;'>Jack's Norwood</h1></div>" +
             "<div style='padding:32px;'>" +
             "<h2 style='color:#1c1917;margin-top:0;'>" + escape(subject) + "</h2>" +
+            imgHtml +
             "<div style='color:#44403c;line-height:1.7;font-size:15px;'>" + escape(body).replace("\n", "<br/>") + "</div></div>" +
             "<div style='background:#fafaf9;border-top:1px solid #e7e5e4;padding:20px 32px;'>" +
             "<p style='color:#a8a29e;font-size:12px;margin:0;'>You're receiving this because you subscribed to Jack's Norwood updates. Reply to unsubscribe.</p>" +
             "</div></div></body></html>";
+
         for (NewsletterSubscriber sub : subscribers) {
             try {
                 MimeMessage message = mailSender.createMimeMessage();
@@ -93,11 +111,18 @@ public class NewsletterService {
                 helper.setTo(sub.getEmail());
                 helper.setSubject(subject);
                 helper.setText(body, htmlBody);
+                if (finalImageFile != null) {
+                    helper.addInline("notify-img", new FileSystemResource(finalImageFile));
+                }
                 mailSender.send(message);
             } catch (Exception e) {
                 log.warn("Failed to notify {}: {}", sub.getEmail(), e.getMessage());
             }
         }
+    }
+
+    public void notifySubscribers(String subject, String body) {
+        notifySubscribers(subject, body, null);
     }
 
     public void unsubscribe(String email) {

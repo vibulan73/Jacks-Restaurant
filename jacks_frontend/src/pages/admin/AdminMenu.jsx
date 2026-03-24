@@ -224,9 +224,10 @@ export default function AdminMenu() {
                       : `$${parseFloat(item.price).toFixed(2)}`}
                   </td>
                   <td className="px-4 py-3 hidden sm:table-cell">
-                    <div className="flex gap-1">
+                    <div className="flex gap-1 flex-wrap">
                       {item.isSpicy && <span className="bg-red-500/20 text-red-400 text-xs px-1.5 py-0.5 rounded"><FaFire size={8} className="inline mr-0.5" />Spicy</span>}
                       {item.isVegan && <span className="bg-green-500/20 text-green-400 text-xs px-1.5 py-0.5 rounded"><FaLeaf size={8} className="inline mr-0.5" />Vegan</span>}
+                      {item.isPopular && <span className="bg-pub-gold/20 text-pub-gold text-xs px-1.5 py-0.5 rounded">★ Popular</span>}
                     </div>
                   </td>
                   <td className="px-4 py-3">

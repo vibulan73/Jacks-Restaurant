@@ -1,17 +1,13 @@
 import { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import toast from 'react-hot-toast';
-import { promotionAPI } from '../../services/api';
-import { HiPlus, HiPencil, HiTrash, HiX } from 'react-icons/hi';
+import { promotionAPI, resolveImageUrl } from '../../services/api';
+import { HiPencil, HiTrash, HiX } from 'react-icons/hi';
 import { FaSun, FaStar } from 'react-icons/fa';
 import ImageUpload from '../../components/ui/ImageUpload';
 
 const DAYS = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
 
-const fmtDate = (dt) => {
-  if (!dt) return '';
-  return new Date(dt).toLocaleString('en-AU', { dateStyle: 'medium', timeStyle: 'short' });
-};
 
 export default function AdminPromotions() {
   const [promotions, setPromotions] = useState([]);
@@ -232,12 +228,13 @@ export default function AdminPromotions() {
 
               <ImageUpload value={imageUrl} onChange={setImageUrl} label="Poster Image" inputCls={inputCls} />
 
+              <div>
+                <label className="text-white/50 text-xs uppercase tracking-wider mb-1 block">Description</label>
+                <textarea {...register('description')} rows={3} className={inputCls + ' resize-none'} />
+              </div>
+
               {promoType === 'SPECIAL' && (
                 <>
-                  <div>
-                    <label className="text-white/50 text-xs uppercase tracking-wider mb-1 block">Description</label>
-                    <textarea {...register('description')} rows={3} className={inputCls + ' resize-none'} />
-                  </div>
                   <div className="grid grid-cols-2 gap-4">
                     <div>
                       <label className="text-white/50 text-xs uppercase tracking-wider mb-1 block">Start Date & Time</label>
@@ -271,7 +268,7 @@ function PromoCard({ p, onEdit, onDelete }) {
   return (
     <div className="bg-gray-900 border border-white/10 rounded-xl overflow-hidden">
       <div className="h-40 relative overflow-hidden">
-        <img src={p.imageUrl || FALLBACK_IMG} alt={p.title}
+        <img src={resolveImageUrl(p.imageUrl) || FALLBACK_IMG} alt={p.title}
           onError={e => { e.target.src = FALLBACK_IMG; }}
           className="w-full h-full object-cover" />
         <div className="absolute inset-0 bg-gradient-to-t from-gray-900/80 to-transparent" />
