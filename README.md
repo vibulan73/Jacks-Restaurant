@@ -244,3 +244,7 @@ cd jacks_backend
 # JAR is at target/jacks_backend-*.jar
 java -jar target/jacks_backend-*.jar
 ```
+
+> **Important:** Set `SPRING_PROFILES_ACTIVE=prod` in your server environment before running in production. This disables the `DataInitializer` which seeds sample data — you don't want it overwriting real data on every restart.
+>
+> Locally, leave it unset (defaults to `dev`) so the database is seeded automatically on first boot.
