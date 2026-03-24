@@ -54,25 +54,7 @@ cd jacks_backend
 cp .env.example .env
 ```
 
-Edit `jacks_backend/.env` with your values:
-
-```env
-DB_HOST=localhost
-DB_PORT=5432
-DB_NAME=jacksnorwood
-DB_USERNAME=postgres
-DB_PASSWORD=your_postgres_password
-
-JWT_SECRET=YourSuperSecretKeyHereMustBeAtLeast256BitsLong1234567890
-JWT_EXPIRATION=86400000
-
-CORS_ALLOWED_ORIGINS=http://localhost:5173
-
-MAIL_HOST=smtp.gmail.com
-MAIL_PORT=587
-MAIL_USERNAME=your-email@gmail.com
-MAIL_PASSWORD=your-app-password
-```
+Open `jacks_backend/.env.example`, copy all the contents, paste into `jacks_backend/.env`, and fill in your values.
 
 #### Create the uploads folder
 
@@ -106,18 +88,7 @@ cd jacks_frontend
 cp .env.example .env
 ```
 
-Edit `jacks_frontend/.env`:
-
-```env
-VITE_API_BASE_URL=http://localhost:8080/api
-VITE_RESTAURANT_NAME=Jack's Norwood
-VITE_RESTAURANT_PHONE=(08) 8234 5678
-VITE_RESTAURANT_EMAIL=info@jacksnorwood.com.au
-VITE_RESTAURANT_ADDRESS=123 The Parade, Norwood SA 5067
-
-# See "Adding a Google Map" section below
-VITE_GOOGLE_MAPS_EMBED_URL=
-```
+Open `jacks_frontend/.env.example`, copy all the contents, paste into `jacks_frontend/.env`, and fill in your values.
 
 #### Install dependencies and run
 
