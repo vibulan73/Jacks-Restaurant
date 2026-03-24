@@ -74,6 +74,16 @@ MAIL_USERNAME=your-email@gmail.com
 MAIL_PASSWORD=your-app-password
 ```
 
+#### Create the uploads folder
+
+The `uploads/` directory is excluded from git. Create it manually before running the backend:
+
+```bash
+mkdir jacks_backend/uploads
+```
+
+This folder stores all uploaded images and PDFs (gallery, team photos, specials posters, CVs). It is never committed to git.
+
 #### Run the backend
 
 ```bash

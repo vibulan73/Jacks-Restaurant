@@ -35,3 +35,6 @@ build/
 
 ### VS Code ###
 .vscode/
+
+# Uploaded files (images, PDFs) — create this folder manually after cloning
+uploads/
