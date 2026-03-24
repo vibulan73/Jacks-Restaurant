@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { FaTimes, FaChevronLeft, FaChevronRight } from 'react-icons/fa';
-import { galleryAPI } from '../../services/api';
+import { galleryAPI, resolveImageUrl } from '../../services/api';
 import SectionHeader from '../../components/ui/SectionHeader';
 import LoadingSpinner from '../../components/ui/LoadingSpinner';
 
@@ -83,7 +83,7 @@ export default function GalleryPage() {
                 onClick={() => openLightbox(idx)}
               >
                 <img
-                  src={img.imageUrl}
+                  src={resolveImageUrl(img.imageUrl)}
                   alt={img.caption || 'Gallery image'}
                   className="w-full object-cover transition-transform duration-500 group-hover:scale-110"
                   loading="lazy"
@@ -124,7 +124,7 @@ export default function GalleryPage() {
               key={lightbox}
               initial={{ scale: 0.9, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
-              src={filtered[lightbox]?.imageUrl}
+              src={resolveImageUrl(filtered[lightbox]?.imageUrl)}
               alt={filtered[lightbox]?.caption}
               className="max-w-5xl max-h-[85vh] object-contain rounded-lg"
               onClick={e => e.stopPropagation()}

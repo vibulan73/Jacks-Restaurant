@@ -2,6 +2,14 @@ import axios from 'axios';
 
 const BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8080/api';
 
+// Resolve uploaded file paths (e.g. "/uploads/file.jpg") to full backend URLs
+const BACKEND_ORIGIN = BASE_URL.replace(/\/api$/, '');
+export const resolveImageUrl = (url) => {
+  if (!url) return '';
+  if (url.startsWith('http')) return url;
+  return BACKEND_ORIGIN + url;
+};
+
 const api = axios.create({
   baseURL: BASE_URL,
   headers: { 'Content-Type': 'application/json' },
@@ -47,6 +55,7 @@ export const authAPI = {
 export const menuAPI = {
   getCategories: () => api.get('/menu/categories'),
   getAll: () => api.get('/menu'),
+  getAllAdmin: () => api.get('/menu/all'),
   getPopular: () => api.get('/menu/popular'),
   getByCategory: (id) => api.get(`/menu/category/${id}`),
   create: (data) => api.post('/menu', data),
@@ -55,6 +64,12 @@ export const menuAPI = {
   createCategory: (data) => api.post('/menu/categories', data),
   updateCategory: (id, data) => api.put(`/menu/categories/${id}`, data),
   deleteCategory: (id) => api.delete(`/menu/categories/${id}`),
+  // Subcategories
+  getSubcategories: () => api.get('/menu/subcategories'),
+  getSubcategoriesByCategory: (catId) => api.get(`/menu/subcategories/category/${catId}`),
+  createSubcategory: (data) => api.post('/menu/subcategories', data),
+  updateSubcategory: (id, data) => api.put(`/menu/subcategories/${id}`, data),
+  deleteSubcategory: (id) => api.delete(`/menu/subcategories/${id}`),
 };
 
 // Promotions
@@ -94,6 +109,30 @@ export const contactAPI = {
   send: (data) => api.post('/contact', data),
   getAll: () => api.get('/contact'),
   markRead: (id) => api.put(`/contact/${id}/read`),
+};
+
+// Newsletter
+export const newsletterAPI = {
+  subscribe: (email, name) => api.post('/newsletter/subscribe', { email, name }),
+  unsubscribe: (email) => api.post('/newsletter/unsubscribe', { email }),
+  getSubscribers: () => api.get('/newsletter/subscribers'),
+  send: (subject, body, imageUrl) => api.post('/newsletter/send', { subject, body, imageUrl }),
+};
+
+// Hero Images
+export const heroImageAPI = {
+  getActive: () => api.get('/hero-images'),
+  getAll: () => api.get('/hero-images/all'),
+  create: (data) => api.post('/hero-images', data),
+  delete: (id) => api.delete(`/hero-images/${id}`),
+};
+
+// Team Members
+export const teamAPI = {
+  getAll: () => api.get('/team'),
+  create: (data) => api.post('/team', data),
+  update: (id, data) => api.put(`/team/${id}`, data),
+  delete: (id) => api.delete(`/team/${id}`),
 };
 
 // Dashboard

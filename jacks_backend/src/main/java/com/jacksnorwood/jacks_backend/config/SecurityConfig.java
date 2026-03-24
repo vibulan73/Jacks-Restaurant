@@ -51,10 +51,19 @@ public class SecurityConfig {
                 .requestMatchers(HttpMethod.GET, "/api/promotions/**").permitAll()
                 .requestMatchers(HttpMethod.GET, "/api/events/**").permitAll()
                 .requestMatchers(HttpMethod.GET, "/api/gallery/**").permitAll()
+                .requestMatchers(HttpMethod.GET, "/api/team/**").permitAll()
+                .requestMatchers(HttpMethod.GET, "/api/hero-images/**").permitAll()
+                .requestMatchers(HttpMethod.POST, "/api/hero-images/**").hasRole("ADMIN")
+                .requestMatchers(HttpMethod.DELETE, "/api/hero-images/**").hasRole("ADMIN")
                 .requestMatchers(HttpMethod.GET, "/api/settings").permitAll()
                 .requestMatchers(HttpMethod.PUT, "/api/settings").hasRole("ADMIN")
                 .requestMatchers(HttpMethod.POST, "/api/reservations").permitAll()
                 .requestMatchers(HttpMethod.POST, "/api/contact").permitAll()
+                // Newsletter: subscribe/unsubscribe public; send/list admin only
+                .requestMatchers(HttpMethod.POST, "/api/newsletter/subscribe").permitAll()
+                .requestMatchers(HttpMethod.POST, "/api/newsletter/unsubscribe").permitAll()
+                .requestMatchers(HttpMethod.GET, "/api/newsletter/**").hasRole("ADMIN")
+                .requestMatchers(HttpMethod.POST, "/api/newsletter/send").hasRole("ADMIN")
                 .requestMatchers("/api/admin/**").hasRole("ADMIN")
                 .requestMatchers(HttpMethod.POST, "/api/menu/**").hasRole("ADMIN")
                 .requestMatchers(HttpMethod.PUT, "/api/menu/**").hasRole("ADMIN")
@@ -93,7 +102,8 @@ public class SecurityConfig {
 
     @Bean
     public AuthenticationProvider authenticationProvider() {
-        DaoAuthenticationProvider provider = new DaoAuthenticationProvider(userDetailsService);
+        DaoAuthenticationProvider provider = new DaoAuthenticationProvider();
+        provider.setUserDetailsService(userDetailsService);
         provider.setPasswordEncoder(passwordEncoder());
         return provider;
     }

@@ -1,8 +1,9 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { Link } from 'react-router-dom';
-import { motion } from 'framer-motion';
-import { FaMapMarkerAlt, FaPhone, FaClock, FaStar, FaQuoteLeft } from 'react-icons/fa';
-import { menuAPI, promotionAPI } from '../../services/api';
+import { motion, AnimatePresence } from 'framer-motion';
+import { FaMapMarkerAlt, FaPhone, FaClock, FaStar, FaQuoteLeft, FaChevronLeft, FaChevronRight } from 'react-icons/fa';
+import { menuAPI, promotionAPI, heroImageAPI, resolveImageUrl } from '../../services/api';
+import heroImg from '../../image/IMG_0327_denoiser.jpeg';
 import MenuItemCard from '../../components/ui/MenuItemCard';
 import SectionHeader from '../../components/ui/SectionHeader';
 import SpecialsPopup from '../../components/ui/SpecialsPopup';
@@ -27,15 +28,41 @@ export default function HomePage() {
   const [popularItems, setPopularItems] = useState([]);
   const [promotions, setPromotions] = useState([]);
   const [loadingMenu, setLoadingMenu] = useState(true);
+  const [heroImages, setHeroImages] = useState([]);
+  const [heroIndex, setHeroIndex] = useState(0);
+  const timerRef = useRef(null);
 
   useEffect(() => {
     Promise.all([
       menuAPI.getPopular().then(r => setPopularItems(r.data.slice(0, 6))),
       promotionAPI.getActive().then(r => setPromotions(r.data.slice(0, 3))),
+      heroImageAPI.getActive().then(r => setHeroImages(r.data)),
     ])
       .catch(console.error)
       .finally(() => setLoadingMenu(false));
   }, []);
+
+  // Auto-advance hero slideshow every 10 seconds
+  useEffect(() => {
+    if (heroImages.length <= 1) return;
+    timerRef.current = setInterval(() => {
+      setHeroIndex(i => (i + 1) % heroImages.length);
+    }, 10000);
+    return () => clearInterval(timerRef.current);
+  }, [heroImages]);
+
+  const heroPrev = () => {
+    clearInterval(timerRef.current);
+    setHeroIndex(i => (i - 1 + heroImages.length) % heroImages.length);
+  };
+  const heroNext = () => {
+    clearInterval(timerRef.current);
+    setHeroIndex(i => (i + 1) % heroImages.length);
+  };
+
+  const heroBg = heroImages.length > 0
+    ? resolveImageUrl(heroImages[heroIndex].imageUrl)
+    : (import.meta.env.VITE_HERO_IMAGE_URL || heroImg);
 
   return (
     <div>
@@ -44,11 +71,47 @@ export default function HomePage() {
 
       {/* HERO */}
       <section className="relative min-h-screen flex items-center justify-center overflow-hidden">
-        <div
-          className="absolute inset-0 bg-cover bg-center bg-fixed"
-          style={{ backgroundImage: "url('https://images.unsplash.com/photo-1566417713940-fe7c737a9ef2?w=1920&q=80')" }}
-        />
+        {/* Slideshow background */}
+        <AnimatePresence mode="sync">
+          <motion.div
+            key={heroIndex}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 1.2 }}
+            className="absolute inset-0 bg-cover bg-center"
+            style={{ backgroundImage: `url('${heroBg}')` }}
+          />
+        </AnimatePresence>
         <div className="absolute inset-0 bg-gradient-to-b from-black/55 via-black/35 to-pub-light/95" />
+
+        {/* Prev / Next buttons — only when multiple images */}
+        {heroImages.length > 1 && (
+          <>
+            <button
+              onClick={heroPrev}
+              className="absolute left-4 top-1/2 -translate-y-1/2 z-20 bg-black/30 hover:bg-black/55 text-white rounded-full p-3 transition-colors"
+            >
+              <FaChevronLeft size={18} />
+            </button>
+            <button
+              onClick={heroNext}
+              className="absolute right-4 top-1/2 -translate-y-1/2 z-20 bg-black/30 hover:bg-black/55 text-white rounded-full p-3 transition-colors"
+            >
+              <FaChevronRight size={18} />
+            </button>
+            {/* Dot indicators */}
+            <div className="absolute bottom-20 left-1/2 -translate-x-1/2 z-20 flex gap-2">
+              {heroImages.map((_, i) => (
+                <button
+                  key={i}
+                  onClick={() => { clearInterval(timerRef.current); setHeroIndex(i); }}
+                  className={`w-2 h-2 rounded-full transition-all duration-300 ${i === heroIndex ? 'bg-pub-gold w-6' : 'bg-white/50'}`}
+                />
+              ))}
+            </div>
+          </>
+        )}
 
         {/* Floating decorative circles */}
         <motion.div
@@ -116,7 +179,7 @@ export default function HomePage() {
         </motion.div>
       </section>
 
-      {/* TODAY'S SPECIALS */}
+      {/* TODAY'S SPECIALS — poster-only grid */}
       {promotions.length > 0 && (
         <section className="py-20 bg-transparent">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -126,31 +189,26 @@ export default function HomePage() {
               initial="hidden"
               whileInView="visible"
               viewport={{ once: true }}
-              className="grid grid-cols-1 md:grid-cols-3 gap-6"
+              className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6"
             >
               {promotions.map((promo) => (
-                <motion.div key={promo.id} variants={fadeUp}
-                  whileHover={{ y: -6 }}
-                  className="bg-white border border-stone-200 rounded-xl overflow-hidden hover:border-pub-gold/40 hover:shadow-lg transition-all duration-300 group">
-                  {promo.imageUrl && (
-                    <div className="h-44 overflow-hidden">
-                      <img src={promo.imageUrl} alt={promo.title}
-                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+                <motion.div key={promo.id} variants={fadeUp} whileHover={{ y: -6 }}>
+                  <Link to="/promotions" className="block group">
+                    <div className="rounded-xl overflow-hidden shadow-md hover:shadow-xl transition-shadow duration-300 aspect-[3/4]">
+                      <img
+                        src={resolveImageUrl(promo.imageUrl) || 'https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=600&h=800&fit=crop'}
+                        alt={promo.title}
+                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                      />
                     </div>
-                  )}
-                  <div className="p-6">
-                    <div className="inline-block bg-pub-gold text-white font-bold text-sm px-3 py-1 rounded mb-3">
-                      {promo.discount}
-                    </div>
-                    <h3 className="font-display text-pub-text text-xl font-semibold mb-2">{promo.title}</h3>
-                    <p className="text-stone-500 text-sm mb-4">{promo.description}</p>
-                    <Link to="/promotions" className="text-pub-gold text-sm font-semibold hover:underline">
-                      View All Specials →
-                    </Link>
-                  </div>
+                    <p className="text-center text-pub-text font-semibold mt-2 group-hover:text-pub-gold transition-colors">{promo.title}</p>
+                  </Link>
                 </motion.div>
               ))}
             </motion.div>
+            <div className="text-center mt-8">
+              <Link to="/promotions" className="btn-outline">View All Specials</Link>
+            </div>
           </div>
         </section>
       )}
@@ -256,7 +314,7 @@ export default function HomePage() {
       {/* LOCATION */}
       <section className="py-20 bg-transparent">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <SectionHeader subtitle="Find Us" title="Location & Hours" />
+          <SectionHeader subtitle="Find Us" title="Location and Hours" />
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 items-start">
             {/* Map */}
             <div className="rounded-xl overflow-hidden border border-stone-200 h-80 lg:h-96 shadow-sm">

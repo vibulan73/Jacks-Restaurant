@@ -1,22 +1,20 @@
 import { useEffect, useState } from 'react';
-import { Link, useSearchParams } from 'react-router-dom';
+import { useSearchParams } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { FaCalendarAlt, FaTag, FaSun, FaStar } from 'react-icons/fa';
-import { promotionAPI } from '../../services/api';
+import { FaCalendarAlt, FaSun, FaStar } from 'react-icons/fa';
+import { promotionAPI, resolveImageUrl } from '../../services/api';
 import SectionHeader from '../../components/ui/SectionHeader';
 import LoadingSpinner from '../../components/ui/LoadingSpinner';
 
 const FALLBACK = 'https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=800&h=400&fit=crop';
 
 const TABS = [
-  { key: 'ALL',     label: 'All Specials', icon: FaTag },
-  { key: 'DAILY',   label: 'Daily Specials', icon: FaSun },
-  { key: 'SPECIAL', label: 'Featured Specials', icon: FaStar },
+  { key: 'DAILY',   label: 'Daily Specials',    icon: FaSun },
+  { key: 'SPECIAL', label: 'Featured Specials',  icon: FaStar },
 ];
 
 function PromoCard({ promo, index }) {
-  const formatDate = (d) =>
-    d ? new Date(d).toLocaleDateString('en-AU', { day: 'numeric', month: 'long', year: 'numeric' }) : '';
+  const isDaily = promo.promotionType === 'DAILY';
 
   return (
     <motion.div
@@ -25,36 +23,31 @@ function PromoCard({ promo, index }) {
       transition={{ delay: index * 0.1, duration: 0.5 }}
       className="bg-white border border-stone-200 rounded-xl overflow-hidden hover:border-pub-gold/40 hover:shadow-lg transition-all duration-300 group flex flex-col"
     >
-      <div className="relative h-52 overflow-hidden">
+      {/* Poster image — portrait aspect ratio */}
+      <div className="relative overflow-hidden aspect-[3/4]">
         <img
-          src={promo.imageUrl || FALLBACK}
+          src={resolveImageUrl(promo.imageUrl) || FALLBACK}
           alt={promo.title}
           className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
           onError={e => { e.target.src = FALLBACK; }}
         />
-        <div className="absolute inset-0 bg-gradient-to-t from-pub-dark/70 to-transparent" />
-        <div className="absolute top-4 right-4 bg-pub-gold text-pub-dark font-bold px-3 py-1.5 rounded flex items-center gap-2 text-sm">
-          <FaTag size={12} />
-          {promo.discount}
+        <div className={`absolute top-4 left-4 text-xs font-bold px-2.5 py-1 rounded-full flex items-center gap-1.5 ${
+          isDaily ? 'bg-blue-500/90 text-white' : 'bg-purple-500/90 text-white'
+        }`}>
+          {isDaily ? <FaSun size={10} /> : <FaStar size={10} />}
+          {isDaily ? (promo.dayOfWeek || 'Daily') : 'Special'}
         </div>
-        {promo.promotionType && (
-          <div className={`absolute top-4 left-4 text-xs font-bold px-2.5 py-1 rounded-full flex items-center gap-1.5 ${
-            promo.promotionType === 'DAILY'
-              ? 'bg-blue-500/90 text-white'
-              : 'bg-purple-500/90 text-white'
-          }`}>
-            {promo.promotionType === 'DAILY' ? <FaSun size={10} /> : <FaStar size={10} />}
-            {promo.promotionType === 'DAILY' ? 'Daily' : 'Special'}
-          </div>
-        )}
       </div>
-      <div className="p-6 flex flex-col flex-1">
-        <h3 className="font-display text-pub-text text-2xl font-bold mb-3">{promo.title}</h3>
-        <p className="text-stone-500 text-sm leading-relaxed mb-4 flex-1">{promo.description}</p>
-        {promo.endDate && (
-          <div className="flex items-center gap-2 text-stone-400 text-xs mb-4">
+
+      <div className="p-5 flex flex-col flex-1">
+        <h3 className="font-display text-pub-text text-xl font-bold mb-2">{promo.title}</h3>
+        {promo.description && (
+          <p className="text-stone-500 text-sm leading-relaxed flex-1">{promo.description}</p>
+        )}
+        {!isDaily && promo.endDateTime && (
+          <div className="flex items-center gap-2 text-stone-400 text-xs mt-3">
             <FaCalendarAlt className="text-pub-gold" />
-            <span>Valid until {formatDate(promo.endDate)}</span>
+            <span>Valid until {new Date(promo.endDateTime).toLocaleString('en-AU', { dateStyle: 'medium', timeStyle: 'short' })}</span>
           </div>
         )}
       </div>
@@ -67,12 +60,13 @@ export default function PromotionsPage() {
   const [loading, setLoading] = useState(true);
   const [searchParams] = useSearchParams();
   const typeParam = searchParams.get('type');
-  const [activeTab, setActiveTab] = useState(typeParam && ['DAILY','SPECIAL'].includes(typeParam) ? typeParam : 'ALL');
+  const [activeTab, setActiveTab] = useState(
+    typeParam && ['DAILY','SPECIAL'].includes(typeParam) ? typeParam : 'DAILY'
+  );
 
-  // Sync tab if URL param changes (e.g. navbar link clicked again)
   useEffect(() => {
     if (typeParam && ['DAILY','SPECIAL'].includes(typeParam)) setActiveTab(typeParam);
-    else if (!typeParam) setActiveTab('ALL');
+    else if (!typeParam) setActiveTab('DAILY');
   }, [typeParam]);
 
   useEffect(() => {
@@ -82,13 +76,12 @@ export default function PromotionsPage() {
       .finally(() => setLoading(false));
   }, []);
 
-  const filtered = activeTab === 'ALL'
-    ? promotions
-    : promotions.filter(p => p.promotionType === activeTab);
+  const filtered = promotions.filter(p => p.promotionType === activeTab);
 
   return (
     <div className="min-h-screen pt-20">
-      <div className="relative py-24 bg-cover bg-center" style={{ backgroundImage: "url('https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=1920&q=80')" }}>
+      <div className="relative py-24 bg-cover bg-center"
+        style={{ backgroundImage: "url('https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=1920&q=80')" }}>
         <div className="absolute inset-0 bg-gradient-to-b from-black/55 via-black/35 to-pub-light/90" />
         <div className="relative z-10 text-center">
           <SectionHeader subtitle="Deals & Offers" title="Our Specials" description="Take advantage of our exclusive offers" light={true} />
@@ -96,7 +89,7 @@ export default function PromotionsPage() {
       </div>
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
-        {/* Tabs */}
+        {/* Tabs — Daily / Featured only (no "All") */}
         <div className="flex flex-wrap justify-center gap-3 mb-12">
           {TABS.map(({ key, label, icon: Icon }) => (
             <button
@@ -118,8 +111,8 @@ export default function PromotionsPage() {
           <LoadingSpinner />
         ) : filtered.length === 0 ? (
           <div className="text-center text-stone-400 py-20">
-            <p className="text-xl">No active specials at the moment</p>
-            <p className="text-sm mt-2">Check back soon for new deals!</p>
+            <p className="text-xl">No {activeTab === 'DAILY' ? 'daily specials' : 'featured specials'} at the moment</p>
+            <p className="text-sm mt-2">Check back soon!</p>
           </div>
         ) : (
           <motion.div

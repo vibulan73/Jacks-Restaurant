@@ -1,5 +1,5 @@
 import { motion } from 'framer-motion';
-import { FaFire, FaLeaf, FaStar } from 'react-icons/fa';
+import { FaFire, FaLeaf } from 'react-icons/fa';
 
 const FALLBACK = 'https://images.unsplash.com/photo-1414235077428-338989a2e8c0?w=400&h=300&fit=crop';
 
@@ -19,11 +19,6 @@ export default function MenuItemCard({ item }) {
         />
         <div className="absolute inset-0 bg-gradient-to-t from-pub-dark/60 to-transparent" />
         <div className="absolute top-3 right-3 flex gap-1">
-          {item.isPopular && (
-            <span className="bg-pub-gold text-pub-dark text-xs px-2 py-0.5 rounded font-bold flex items-center gap-1">
-              <FaStar size={10} /> Popular
-            </span>
-          )}
           {item.isSpicy && (
             <span className="bg-red-600 text-white text-xs px-2 py-0.5 rounded font-bold flex items-center gap-1">
               <FaFire size={10} /> Spicy

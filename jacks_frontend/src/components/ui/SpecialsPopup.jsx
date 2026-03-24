@@ -1,26 +1,26 @@
 import { useEffect, useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { FaTag, FaTimes } from 'react-icons/fa';
+import { FaTimes } from 'react-icons/fa';
 import { promotionAPI } from '../../services/api';
 
-const FALLBACK = 'https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=800&h=300&fit=crop';
+const FALLBACK = 'https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=800&h=500&fit=crop';
 
 export default function SpecialsPopup() {
   const [visible, setVisible] = useState(false);
-  const [specials, setSpecials] = useState([]);
+  const [dailySpecials, setDailySpecials] = useState([]);
   const navigate = useNavigate();
 
   useEffect(() => {
-    // Only show once per browser session
     if (sessionStorage.getItem('specials_popup_shown')) return;
 
     promotionAPI.getActive()
       .then(r => {
-        const items = r.data.slice(0, 3);
-        if (items.length > 0) {
-          setSpecials(items);
-          // Slight delay so page loads first
+        // Show only today's DAILY type promotions in the popup
+        const today = new Date().toLocaleDateString('en-US', { weekday: 'long' });
+        const daily = r.data.filter(p => p.promotionType === 'DAILY' && (!p.dayOfWeek || p.dayOfWeek === today));
+        if (daily.length > 0) {
+          setDailySpecials(daily);
           setTimeout(() => setVisible(true), 800);
         }
       })
@@ -34,12 +34,15 @@ export default function SpecialsPopup() {
 
   const goToSpecials = () => {
     close();
-    navigate('/promotions');
+    navigate('/promotions?type=DAILY');
   };
+
+  // Single special shown at a time — use the first one, or show a poster grid
+  const featured = dailySpecials[0];
 
   return (
     <AnimatePresence>
-      {visible && (
+      {visible && featured && (
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
@@ -47,76 +50,59 @@ export default function SpecialsPopup() {
           className="fixed inset-0 z-[100] flex items-center justify-center px-4"
           onClick={close}
         >
-          {/* Backdrop */}
-          <div className="absolute inset-0 bg-pub-dark/60 backdrop-blur-sm" />
+          <div className="absolute inset-0 bg-pub-dark/65 backdrop-blur-sm" />
 
-          {/* Panel */}
           <motion.div
             initial={{ scale: 0.88, opacity: 0, y: 30 }}
             animate={{ scale: 1, opacity: 1, y: 0 }}
             exit={{ scale: 0.88, opacity: 0, y: 30 }}
             transition={{ type: 'spring', stiffness: 260, damping: 22 }}
-            onClick={e => { e.stopPropagation(); goToSpecials(); }}
-            className="relative bg-white rounded-2xl shadow-2xl w-full max-w-2xl overflow-hidden cursor-pointer"
+            onClick={e => e.stopPropagation()}
+            className="relative bg-white rounded-2xl shadow-2xl w-full max-w-sm overflow-hidden flex flex-col"
+            style={{ maxHeight: '90vh' }}
           >
-            {/* Header */}
-            <div className="bg-pub-dark px-6 py-5 flex items-center justify-between">
-              <div className="flex items-center gap-3">
-                <div className="w-8 h-8 bg-pub-gold rounded-full flex items-center justify-center">
-                  <FaTag size={14} className="text-white" />
-                </div>
-                <div>
-                  <p className="text-pub-gold text-xs uppercase tracking-widest font-semibold">Don't miss out</p>
-                  <h2 className="font-display text-white text-xl font-bold">Today's Specials</h2>
-                </div>
-              </div>
-              <button
-                onClick={e => { e.stopPropagation(); close(); }}
-                className="text-white/50 hover:text-white transition-colors p-1"
-              >
-                <FaTimes size={20} />
-              </button>
-            </div>
+            {/* Close button */}
+            <button
+              onClick={close}
+              className="absolute top-3 right-3 z-10 bg-black/30 hover:bg-black/50 text-white rounded-full p-1.5 transition-colors"
+            >
+              <FaTimes size={16} />
+            </button>
 
-            {/* Specials list */}
-            <div className="p-6 space-y-4 max-h-[60vh] overflow-y-auto">
-              {specials.map(promo => (
-                <div key={promo.id} className="flex gap-4 items-start bg-pub-light rounded-xl overflow-hidden border border-stone-200">
-                  <div className="w-24 h-20 flex-shrink-0 overflow-hidden">
-                    <img
-                      src={promo.imageUrl || FALLBACK}
-                      alt={promo.title}
-                      className="w-full h-full object-cover"
-                      onError={e => { e.target.src = FALLBACK; }}
-                    />
-                  </div>
-                  <div className="py-3 pr-4 flex-1">
-                    <div className="flex items-center gap-2 mb-1">
-                      <span className="bg-pub-gold text-white text-xs font-bold px-2 py-0.5 rounded">
-                        {promo.discount}
-                      </span>
-                    </div>
-                    <h3 className="font-display text-pub-text font-semibold text-base">{promo.title}</h3>
-                    <p className="text-stone-500 text-sm line-clamp-2 mt-0.5">{promo.description}</p>
-                  </div>
-                </div>
-              ))}
+            {/* Poster image */}
+            <div
+              className="cursor-pointer overflow-hidden flex-shrink-0"
+              style={{ maxHeight: '60vh' }}
+              onClick={goToSpecials}
+            >
+              <img
+                src={featured.imageUrl || FALLBACK}
+                alt={featured.title}
+                className="w-full h-full object-cover"
+                onError={e => { e.target.src = FALLBACK; }}
+              />
             </div>
 
             {/* Footer */}
-            <div className="px-6 pb-6 flex gap-3">
-              <button
-                onClick={e => { e.stopPropagation(); goToSpecials(); }}
-                className="flex-1 btn-primary text-center"
-              >
-                View All Specials
-              </button>
-              <button
-                onClick={e => { e.stopPropagation(); close(); }}
-                className="flex-1 border-2 border-stone-300 text-stone-600 font-semibold px-6 py-3 rounded-sm hover:bg-stone-100 transition-all duration-200 uppercase tracking-wider text-sm"
-              >
-                Maybe Later
-              </button>
+            <div className="px-6 py-5">
+              <h2 className="font-display text-pub-text text-xl font-bold mb-1">{featured.title}</h2>
+              {dailySpecials.length > 1 && (
+                <p className="text-stone-400 text-xs mb-4">{dailySpecials.length} daily specials available</p>
+              )}
+              <div className="flex gap-3">
+                <button
+                  onClick={goToSpecials}
+                  className="flex-1 btn-primary text-center text-sm"
+                >
+                  View Specials
+                </button>
+                <button
+                  onClick={close}
+                  className="flex-1 border-2 border-stone-300 text-stone-600 font-semibold px-4 py-2.5 rounded-sm hover:bg-stone-100 transition-all text-sm uppercase tracking-wider"
+                >
+                  Maybe Later
+                </button>
+              </div>
             </div>
           </motion.div>
         </motion.div>

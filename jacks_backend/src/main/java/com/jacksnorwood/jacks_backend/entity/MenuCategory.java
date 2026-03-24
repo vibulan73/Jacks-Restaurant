@@ -20,6 +20,8 @@ public class MenuCategory {
 
     private String description;
 
+    private String imageUrl;
+
     private Integer displayOrder;
 
     @OneToMany(mappedBy = "category", cascade = CascadeType.ALL, fetch = FetchType.LAZY)

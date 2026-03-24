@@ -10,11 +10,9 @@ import ScrollToTop from './components/ui/ScrollToTop';
 import HomePage from './pages/public/HomePage';
 import MenuPage from './pages/public/MenuPage';
 import PromotionsPage from './pages/public/PromotionsPage';
-import EventsPage from './pages/public/EventsPage';
 import GalleryPage from './pages/public/GalleryPage';
 import AboutPage from './pages/public/AboutPage';
 import ContactPage from './pages/public/ContactPage';
-import ReservationPage from './pages/public/ReservationPage';
 
 // Admin
 import AdminLayout from './components/layout/AdminLayout';
@@ -25,8 +23,10 @@ import AdminPromotions from './pages/admin/AdminPromotions';
 import AdminEvents from './pages/admin/AdminEvents';
 import AdminGallery from './pages/admin/AdminGallery';
 import AdminReservations from './pages/admin/AdminReservations';
-import AdminMessages from './pages/admin/AdminMessages';
 import AdminSettings from './pages/admin/AdminSettings';
+import AdminNewsletter from './pages/admin/AdminNewsletter';
+import AdminHeroImages from './pages/admin/AdminHeroImages';
+import AdminTeam from './pages/admin/AdminTeam';
 
 const ProtectedRoute = ({ children }) => {
   const { user, loading } = useAuth();
@@ -72,7 +72,9 @@ export default function App() {
             <Route path="events" element={<AdminEvents />} />
             <Route path="gallery" element={<AdminGallery />} />
             <Route path="reservations" element={<AdminReservations />} />
-            <Route path="messages" element={<AdminMessages />} />
+            <Route path="newsletter" element={<AdminNewsletter />} />
+            <Route path="hero" element={<AdminHeroImages />} />
+            <Route path="team" element={<AdminTeam />} />
             <Route path="settings" element={<AdminSettings />} />
           </Route>
 

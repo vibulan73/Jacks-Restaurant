@@ -77,17 +77,13 @@ export default function EventsPage() {
                     <h3 className="font-display text-pub-text text-3xl font-bold mb-3">{event.title}</h3>
                     <p className="text-stone-500 leading-relaxed">{event.description}</p>
                   </div>
-                  <div className="mt-6 flex gap-4">
-                    {event.reservationLink ? (
+                  {event.reservationLink && (
+                    <div className="mt-6 flex gap-4">
                       <a href={event.reservationLink} target="_blank" rel="noopener noreferrer" className="btn-primary flex items-center gap-2">
                         <FaTicketAlt /> Reserve Your Spot
                       </a>
-                    ) : (
-                      <Link to="/reservation" className="btn-primary flex items-center gap-2">
-                        <FaTicketAlt /> Book a Table
-                      </Link>
-                    )}
-                  </div>
+                    </div>
+                  )}
                 </div>
               </motion.div>
             ))}

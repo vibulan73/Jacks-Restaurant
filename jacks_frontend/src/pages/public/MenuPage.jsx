@@ -1,331 +1,307 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useMemo } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { FaArrowLeft, FaFire, FaLeaf, FaStar } from 'react-icons/fa';
-import { HiChevronRight } from 'react-icons/hi';
-import { menuAPI } from '../../services/api';
-import MenuItemCard from '../../components/ui/MenuItemCard';
-import SectionHeader from '../../components/ui/SectionHeader';
+import { FaFire, FaLeaf } from 'react-icons/fa';
+import { menuAPI, resolveImageUrl } from '../../services/api';
 import LoadingSpinner from '../../components/ui/LoadingSpinner';
 
-const FALLBACK = 'https://images.unsplash.com/photo-1414235077428-338989a2e8c0?w=800&h=400&fit=crop';
+const FALLBACK = 'https://images.unsplash.com/photo-1414235077428-338989a2e8c0?w=400&h=300&fit=crop';
+const FALLBACK_BANNER = 'https://images.unsplash.com/photo-1414235077428-338989a2e8c0?w=1200&h=400&fit=crop';
 
-// Slugs for categories that show subcategory variety cards first
-const VARIETY_SLUGS = ['main-menu', 'drinks'];
 
-function toSlug(name) {
-  return name.toLowerCase().replace(/\s+/g, '-');
+function toSlug(name = '') {
+  return name.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '');
 }
 
-// Card for direct-item categories (Desserts, Kids Menu)
-function DirectItemCard({ item }) {
-  return (
-    <motion.div
-      whileHover={{ y: -4 }}
-      className="bg-white border border-stone-200 rounded-xl overflow-hidden flex flex-col hover:border-pub-gold/40 hover:shadow-lg transition-all duration-300"
-    >
-      <div className="relative h-48 overflow-hidden">
-        <img
-          src={item.imageUrl || FALLBACK}
-          alt={item.name}
-          className="w-full h-full object-cover transition-transform duration-500 hover:scale-110"
-          loading="lazy"
-          onError={e => { e.target.src = FALLBACK; }}
-        />
-        <div className="absolute inset-0 bg-gradient-to-t from-pub-dark/70 to-transparent" />
-        <div className="absolute bottom-3 right-3 bg-pub-gold text-pub-dark font-bold px-3 py-1 rounded-lg text-sm">
-          ${parseFloat(item.price).toFixed(2)}
-        </div>
-      </div>
-      <div className="p-4 flex-1">
-        <h3 className="font-display text-pub-text font-semibold text-lg leading-tight">{item.name}</h3>
-        {item.description && (
-          <p className="text-stone-500 text-sm leading-relaxed mt-1">{item.description}</p>
-        )}
-        <div className="flex gap-1 mt-2 flex-wrap">
-          {item.isPopular && <span className="bg-pub-gold/20 text-pub-gold text-xs px-2 py-0.5 rounded flex items-center gap-1"><FaStar size={10} /> Popular</span>}
-          {item.isSpicy && <span className="bg-red-600/20 text-red-400 text-xs px-2 py-0.5 rounded flex items-center gap-1"><FaFire size={10} /> Spicy</span>}
-          {item.isVegan && <span className="bg-green-600/20 text-green-400 text-xs px-2 py-0.5 rounded flex items-center gap-1"><FaLeaf size={10} /> Vegan</span>}
-        </div>
-      </div>
-    </motion.div>
-  );
-}
-
-// Subcategory variety card for Main Menu / Drinks
-function VarietyCard({ name, count, imageUrl, onClick }) {
-  return (
-    <motion.div
-      whileHover={{ y: -4 }}
-      onClick={onClick}
-      className="relative h-60 cursor-pointer overflow-hidden rounded-xl border border-white/10 hover:border-pub-gold/50 transition-all duration-300 group"
-    >
-      <img
-        src={imageUrl}
-        alt={name}
-        className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
-        onError={e => { e.target.src = FALLBACK; }}
-      />
-      <div className="absolute inset-0 bg-gradient-to-t from-pub-dark/90 via-pub-dark/40 to-transparent" />
-      <div className="absolute bottom-0 left-0 right-0 p-5 flex items-end justify-between">
-        <div>
-          <h3 className="font-display text-white text-2xl font-bold">{name}</h3>
-          <p className="text-white/60 text-sm mt-1">{count} {count === 1 ? 'item' : 'items'}</p>
-        </div>
-        <div className="bg-pub-gold rounded-full p-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-          <HiChevronRight size={18} className="text-pub-dark" />
-        </div>
-      </div>
-    </motion.div>
-  );
-}
-
-// Table-style item card for variety detail view (2 columns)
-function TableItemCard({ item }) {
+// ── Single item card ──────────────────────────────────────────────────────────
+function ItemCard({ item }) {
+  const hasSizes = item.sizes && item.sizes.length > 0;
   return (
     <div className="bg-white border border-stone-200 rounded-xl overflow-hidden hover:border-pub-gold/40 hover:shadow-md transition-all duration-200 flex gap-4 p-4">
-      <img
-        src={item.imageUrl || FALLBACK}
-        alt={item.name}
-        className="w-24 h-20 object-cover rounded-lg flex-shrink-0"
-        onError={e => { e.target.src = FALLBACK; }}
-      />
       <div className="flex-1 min-w-0">
         <div className="flex justify-between items-start gap-2">
           <h3 className="font-display text-pub-text font-semibold text-base leading-tight">{item.name}</h3>
-          <span className="text-pub-gold font-bold text-base whitespace-nowrap">${parseFloat(item.price).toFixed(2)}</span>
+          {!hasSizes && item.price > 0 && (
+            <span className="text-pub-gold font-bold text-base whitespace-nowrap flex-shrink-0">
+              ${parseFloat(item.price).toFixed(2)}
+            </span>
+          )}
         </div>
         {item.description && (
           <p className="text-stone-500 text-sm leading-relaxed mt-1 line-clamp-2">{item.description}</p>
         )}
+        {hasSizes && (
+          <div className="mt-2 flex flex-wrap gap-x-4 gap-y-1">
+            {item.sizes.map((size, i) => (
+              <span key={i} className="text-sm">
+                <span className="text-stone-600">{size.name}:</span>{' '}
+                <span className="text-pub-gold font-semibold">${parseFloat(size.price).toFixed(2)}</span>
+              </span>
+            ))}
+          </div>
+        )}
         <div className="flex gap-1 mt-2 flex-wrap">
-          {item.isPopular && <span className="bg-pub-gold/20 text-pub-gold text-xs px-1.5 py-0.5 rounded flex items-center gap-1"><FaStar size={9} /> Popular</span>}
-          {item.isSpicy && <span className="bg-red-600/20 text-red-400 text-xs px-1.5 py-0.5 rounded flex items-center gap-1"><FaFire size={9} /> Spicy</span>}
-          {item.isVegan && <span className="bg-green-600/20 text-green-400 text-xs px-1.5 py-0.5 rounded flex items-center gap-1"><FaLeaf size={9} /> Vegan</span>}
+          {item.isSpicy && (
+            <span className="bg-red-50 text-red-500 border border-red-100 text-xs px-1.5 py-0.5 rounded-full flex items-center gap-1">
+              <FaFire size={9} /> Spicy
+            </span>
+          )}
+          {item.isVegan && (
+            <span className="bg-green-50 text-green-600 border border-green-100 text-xs px-1.5 py-0.5 rounded-full flex items-center gap-1">
+              <FaLeaf size={9} /> Vegan
+            </span>
+          )}
         </div>
       </div>
     </div>
   );
 }
 
+// ─────────────────────────────────────────────────────────────────────────────
 export default function MenuPage() {
-  const [categories, setCategories] = useState([]);
-  const [items, setItems] = useState([]);
-  const [activeCategory, setActiveCategory] = useState('all');
-  const [activeCategorySlug, setActiveCategorySlug] = useState('all');
-  const [activeVariety, setActiveVariety] = useState(null);
-  const [search, setSearch] = useState('');
-  const [loading, setLoading] = useState(true);
-  const [searchParams] = useSearchParams();
-  const categoryParam = searchParams.get('category');
+  const [searchParams, setSearchParams] = useSearchParams();
+  const categorySlug = searchParams.get('category');
 
+  const [categories, setCategories]     = useState([]);
+  const [subcategories, setSubcategories] = useState([]);
+  const [items, setItems]               = useState([]);
+  const [, setCatLoading]               = useState(true);
+  const [loading, setLoading]           = useState(false);
+  const [activeSection, setActiveSection] = useState(null);
+
+  // ── 1. Load all categories once ───────────────────────────────────────────
   useEffect(() => {
-    Promise.all([
-      menuAPI.getCategories().then(r => {
-        setCategories(r.data);
-        if (categoryParam) {
-          const match = r.data.find(c => toSlug(c.name) === categoryParam);
-          if (match) {
-            setActiveCategory(match.id);
-            setActiveCategorySlug(categoryParam);
-          }
-        }
-      }),
-      menuAPI.getAll().then(r => setItems(r.data)),
-    ]).catch(console.error).finally(() => setLoading(false));
+    menuAPI.getCategories()
+      .then(r => setCategories(r.data))
+      .catch(console.error)
+      .finally(() => setCatLoading(false));
   }, []);
 
+  // ── 2. Derive the active category from the URL slug ───────────────────────
+  const activeCategory = useMemo(() => {
+    if (!categories.length) return null;
+    return categories.find(c => toSlug(c.name) === categorySlug) || categories[0];
+  }, [categories, categorySlug]);
+
+  // ── 3. If no slug in URL, write the default (first category) ─────────────
   useEffect(() => {
-    if (!categoryParam) {
-      setActiveCategory('all');
-      setActiveCategorySlug('all');
-      setActiveVariety(null);
-      return;
+    if (activeCategory && !categorySlug) {
+      setSearchParams({ category: toSlug(activeCategory.name) }, { replace: true });
     }
-    const match = categories.find(c => toSlug(c.name) === categoryParam);
-    if (match) {
-      setActiveCategory(match.id);
-      setActiveCategorySlug(categoryParam);
-      setActiveVariety(null);
-    }
-  }, [categoryParam, categories]);
+  }, [activeCategory, categorySlug]);
 
-  const handleCategoryClick = (catId, catSlug) => {
-    setActiveCategory(catId);
-    setActiveCategorySlug(catSlug ?? 'all');
-    setActiveVariety(null);
-    setSearch('');
+  // ── 4. Load items + subcategories for the active category ────────────────
+  useEffect(() => {
+    if (!activeCategory) return;
+    setLoading(true);
+    setItems([]);
+    setSubcategories([]);
+    setActiveSection(null);
+    Promise.all([
+      menuAPI.getByCategory(activeCategory.id),
+      menuAPI.getSubcategoriesByCategory(activeCategory.id),
+    ])
+      .then(([itemsRes, subcatsRes]) => {
+        setItems(itemsRes.data);
+        setSubcategories(subcatsRes.data);
+      })
+      .catch(console.error)
+      .finally(() => setLoading(false));
+  }, [activeCategory?.id]);
+
+  // ── 5. Build content sections ─────────────────────────────────────────────
+  //    - One section per subcategory that has items (in displayOrder from API)
+  //    - One extra section for items with no subcategory (if any)
+  const sections = useMemo(() => {
+    const result = [];
+    subcategories.forEach(sc => {
+      const scItems = items.filter(i => i.subcategoryId === sc.id);
+      if (scItems.length > 0) {
+        result.push({ id: `sc-${sc.id}`, name: sc.name, imageUrl: sc.imageUrl, items: scItems });
+      }
+    });
+    const noSub = items.filter(i => !i.subcategoryId);
+    if (noSub.length > 0) {
+      result.push({
+        id: 'sc-none',
+        name: activeCategory?.name || 'Items',
+        imageUrl: noSub.find(i => i.imageUrl)?.imageUrl || null,
+        items: noSub,
+      });
+    }
+    return result;
+  }, [items, subcategories, activeCategory]);
+
+  // ── 6. Set initial active section ─────────────────────────────────────────
+  useEffect(() => {
+    if (sections.length > 0) setActiveSection(sections[0].id);
+  }, [sections]);
+
+  // ── 7. IntersectionObserver — highlight active sidebar item ───────────────
+  useEffect(() => {
+    if (!sections.length) return;
+    const observers = [];
+    sections.forEach(sec => {
+      const el = document.getElementById(sec.id);
+      if (!el) return;
+      const obs = new IntersectionObserver(
+        ([entry]) => { if (entry.isIntersecting) setActiveSection(sec.id); },
+        { rootMargin: '-20% 0px -70% 0px', threshold: 0 }
+      );
+      obs.observe(el);
+      observers.push(obs);
+    });
+    return () => observers.forEach(o => o.disconnect());
+  }, [sections]);
+
+  const scrollTo = (id) => {
+    const el = document.getElementById(id);
+    if (el) { el.scrollIntoView({ behavior: 'smooth', block: 'start' }); setActiveSection(id); }
   };
 
-  const categoryItems = activeCategory === 'all'
-    ? items
-    : items.filter(item => item.categoryId === activeCategory);
+  const hasSubcategories = subcategories.length > 0;
 
-  const isVarietyCategory = VARIETY_SLUGS.includes(activeCategorySlug);
-  const isDirectCategory = activeCategory !== 'all' && !isVarietyCategory;
-
-  // Group items by subcategory for variety view
-  const grouped = {};
-  categoryItems.forEach(item => {
-    const key = item.subcategory || 'Other';
-    if (!grouped[key]) grouped[key] = [];
-    grouped[key].push(item);
-  });
-
-  const getGroupImage = (groupItems) => {
-    const withImg = groupItems.find(i => i.imageUrl);
-    return withImg ? withImg.imageUrl : FALLBACK;
-  };
-
-  const varietyItems = activeVariety
-    ? categoryItems.filter(i => (i.subcategory || 'Other') === activeVariety)
-    : [];
-
-  const searchFiltered = categoryItems.filter(item =>
-    item.name.toLowerCase().includes(search.toLowerCase()) ||
-    (item.description || '').toLowerCase().includes(search.toLowerCase())
-  );
+  // ── Sidebar button style ───────────────────────────────────────────────────
+  const sideBtnCls = (id) =>
+    `w-full flex items-center gap-3 p-3 rounded-xl text-left transition-all duration-200 ${
+      activeSection === id
+        ? 'bg-pub-gold text-white shadow-md'
+        : 'bg-white text-stone-600 hover:bg-stone-50 border border-stone-200 hover:border-pub-gold/30'
+    }`;
 
   return (
     <div className="min-h-screen pt-20">
-      {/* Hero */}
-      <div className="relative py-24 bg-cover bg-center" style={{ backgroundImage: "url('https://images.unsplash.com/photo-1414235077428-338989a2e8c0?w=1920&q=80')" }}>
-        <div className="absolute inset-0 bg-gradient-to-b from-black/55 via-black/35 to-pub-light/90" />
-        <div className="relative z-10 text-center">
-          <SectionHeader subtitle="Explore" title="Our Menu" description="Fresh, locally sourced ingredients crafted with passion" light={true} />
-        </div>
-      </div>
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
-        {/* Category Tabs */}
-        <div className="flex flex-wrap justify-center gap-2 mb-12">
-          <button
-            onClick={() => handleCategoryClick('all')}
-            className={`px-5 py-2 rounded-full text-sm font-semibold uppercase tracking-wider transition-all duration-200 ${
-              activeCategory === 'all' ? 'bg-pub-gold text-white' : 'bg-white text-stone-600 hover:bg-pub-gold/10 border border-stone-200'
-            }`}
+      {/* ── Mobile sticky subcategory bar ───────────────────────────────────── */}
+      {hasSubcategories && !loading && sections.length > 0 && (
+        <div className="md:hidden sticky top-20 z-40 bg-white/95 backdrop-blur-sm border-b border-stone-200 shadow-sm">
+          <div
+            className="flex overflow-x-auto gap-2 px-4 py-3"
+            style={{ scrollbarWidth: 'none' }}
           >
-            All
-          </button>
-          {categories.map(cat => (
-            <button
-              key={cat.id}
-              onClick={() => handleCategoryClick(cat.id, toSlug(cat.name))}
-              className={`px-5 py-2 rounded-full text-sm font-semibold uppercase tracking-wider transition-all duration-200 ${
-                activeCategory === cat.id ? 'bg-pub-gold text-white' : 'bg-white text-stone-600 hover:bg-pub-gold/10 border border-stone-200'
-              }`}
-            >
-              {cat.name}
-            </button>
-          ))}
+            {sections.map(sec => (
+              <button
+                key={sec.id}
+                onClick={() => scrollTo(sec.id)}
+                className={`flex-shrink-0 flex items-center gap-2 px-4 py-2 rounded-full text-sm font-semibold border transition-all ${
+                  activeSection === sec.id
+                    ? 'bg-pub-gold text-white border-pub-gold'
+                    : 'bg-white text-stone-600 border-stone-200'
+                }`}
+              >
+                {sec.imageUrl && (
+                  <img src={resolveImageUrl(sec.imageUrl)} alt={sec.name}
+                    className="w-5 h-5 rounded-full object-cover"
+                    onError={e => { e.target.src = FALLBACK; }} />
+                )}
+                {sec.name}
+              </button>
+            ))}
+          </div>
         </div>
+      )}
 
+{/* ── Content ────────────────────────────────────────────────────────── */}
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
         {loading ? (
           <LoadingSpinner />
+        ) : sections.length === 0 ? (
+          <div className="text-center text-stone-400 py-24">
+            <p className="text-xl font-display">No items in this category yet</p>
+          </div>
         ) : (
           <>
-            {/* ALL view — flat grid with search */}
-            {activeCategory === 'all' && (
-              <>
-                <div className="max-w-md mx-auto mb-8">
-                  <input
-                    type="text"
-                    placeholder="Search menu items..."
-                    value={search}
-                    onChange={e => setSearch(e.target.value)}
-                    className="w-full bg-white border border-stone-200 text-pub-text placeholder-stone-400 px-5 py-3 rounded-lg focus:outline-none focus:border-pub-gold shadow-sm"
-                  />
-                </div>
-                {searchFiltered.length === 0 ? (
-                  <div className="text-center text-stone-400 py-20">
-                    <p className="text-xl">No items found</p>
-                    <p className="text-sm mt-2">Try adjusting your search</p>
-                  </div>
-                ) : (
-                  <motion.div
-                    key={search}
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    transition={{ duration: 0.3 }}
-                    className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6"
-                  >
-                    {searchFiltered.map(item => (
-                      <MenuItemCard key={item.id} item={item} />
-                    ))}
-                  </motion.div>
-                )}
-              </>
-            )}
 
-            {/* DIRECT view — Desserts, Kids Menu: item cards with image + price */}
-            {isDirectCategory && (
-              <motion.div
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                transition={{ duration: 0.3 }}
-                className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6"
-              >
-                {categoryItems.length === 0 ? (
-                  <div className="col-span-full text-center text-stone-400 py-20">
-                    <p className="text-xl">No items in this category</p>
-                  </div>
-                ) : categoryItems.map(item => (
-                  <DirectItemCard key={item.id} item={item} />
-                ))}
-              </motion.div>
-            )}
+            <div className="flex gap-8 items-start">
 
-            {/* VARIETY view — Main Menu, Drinks: subcategory grid */}
-            {isVarietyCategory && !activeVariety && (
-              <motion.div
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                transition={{ duration: 0.3 }}
-                className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6"
-              >
-                {Object.keys(grouped).length === 0 ? (
-                  <div className="col-span-full text-center text-stone-400 py-20">
-                    <p className="text-xl">No items in this category</p>
-                  </div>
-                ) : Object.entries(grouped).map(([subcat, subcatItems]) => (
-                  <VarietyCard
-                    key={subcat}
-                    name={subcat}
-                    count={subcatItems.length}
-                    imageUrl={getGroupImage(subcatItems)}
-                    onClick={() => setActiveVariety(subcat)}
-                  />
-                ))}
-              </motion.div>
-            )}
-
-            {/* VARIETY DETAIL view — 2-column tabular items */}
-            {isVarietyCategory && activeVariety && (
-              <motion.div
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                transition={{ duration: 0.3 }}
-              >
-                <button
-                  onClick={() => setActiveVariety(null)}
-                  className="flex items-center gap-2 text-pub-gold hover:text-pub-gold/80 mb-8 font-semibold text-sm uppercase tracking-wider transition-colors"
+              {/* ── Left sidebar — sticks to viewport, scrolls independently ── */}
+              {hasSubcategories && (
+                <aside
+                  className="hidden md:flex flex-col w-56 flex-shrink-0 self-start"
+                  style={{ position: 'sticky', top: '96px', height: 'calc(100vh - 112px)' }}
                 >
-                  <FaArrowLeft size={14} /> Back to Categories
-                </button>
-                <h2 className="font-display text-pub-text text-3xl font-bold mb-8">{activeVariety}</h2>
-                {varietyItems.length === 0 ? (
-                  <div className="text-center text-stone-400 py-20">
-                    <p className="text-xl">No items found</p>
-                  </div>
-                ) : (
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    {varietyItems.map(item => (
-                      <TableItemCard key={item.id} item={item} />
+                  {/* Header */}
+                  <p className="text-xs font-bold uppercase tracking-widest text-stone-400 px-1 pb-2 border-b border-stone-200 mb-2 flex-shrink-0">
+                    {activeCategory?.name}
+                  </p>
+
+                  {/* Scrollable subcategory list */}
+                  <div
+                    className="flex-1 overflow-y-auto space-y-1.5 pr-1"
+                    style={{ scrollbarWidth: 'thin', scrollbarColor: '#d97706 #f5f5f4' }}
+                  >
+                    {sections.map(sec => (
+                      <button
+                        key={sec.id}
+                        onClick={() => scrollTo(sec.id)}
+                        className={sideBtnCls(sec.id)}
+                      >
+                        {sec.imageUrl ? (
+                          <img
+                            src={resolveImageUrl(sec.imageUrl)}
+                            alt={sec.name}
+                            className="w-10 h-10 rounded-lg object-cover flex-shrink-0"
+                            onError={e => { e.target.src = FALLBACK; }}
+                          />
+                        ) : (
+                          <div className="w-10 h-10 rounded-lg bg-stone-100 flex-shrink-0" />
+                        )}
+                        <span className="font-semibold text-sm leading-tight">{sec.name}</span>
+                      </button>
                     ))}
                   </div>
-                )}
-              </motion.div>
-            )}
+                </aside>
+              )}
+
+              {/* ── Scrollable item sections ──────────────────────────────── */}
+              <main className="flex-1 min-w-0 space-y-14">
+                {sections.map((sec, index) => (
+                  <motion.div
+                    key={sec.id}
+                    id={sec.id}
+                    initial={{ opacity: 0, y: 20 }}
+                    whileInView={{ opacity: 1, y: 0 }}
+                    viewport={{ once: true, margin: '-8%' }}
+                    transition={{ duration: 0.4, delay: Math.min(index * 0.06, 0.3) }}
+                  >
+                    {/* Section banner with subcategory image + heading */}
+                    {sec.imageUrl ? (
+                      <div className="relative h-44 sm:h-52 rounded-2xl overflow-hidden mb-6 shadow-sm">
+                        <img
+                          src={resolveImageUrl(sec.imageUrl)}
+                          alt={sec.name}
+                          className="w-full h-full object-cover"
+                          onError={e => { e.target.src = FALLBACK_BANNER; }}
+                        />
+                        <div className="absolute inset-0 bg-gradient-to-t from-black/75 via-black/20 to-transparent" />
+                        <div className="absolute bottom-0 left-0 p-5">
+                          <h2 className="font-display text-white text-3xl font-bold drop-shadow">
+                            {sec.name}
+                          </h2>
+                          <p className="text-white/65 text-sm mt-1">
+                            {sec.items.length} {sec.items.length === 1 ? 'item' : 'items'}
+                          </p>
+                        </div>
+                      </div>
+                    ) : (
+                      <div className="mb-6 pb-4 border-b-2 border-stone-100">
+                        <h2 className="font-display text-pub-text text-2xl font-bold">{sec.name}</h2>
+                        <p className="text-stone-400 text-sm mt-1">
+                          {sec.items.length} {sec.items.length === 1 ? 'item' : 'items'}
+                        </p>
+                      </div>
+                    )}
+
+                    {/* Items grid */}
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      {sec.items.map(item => (
+                        <ItemCard key={item.id} item={item} />
+                      ))}
+                    </div>
+                  </motion.div>
+                ))}
+              </main>
+            </div>
           </>
         )}
       </div>

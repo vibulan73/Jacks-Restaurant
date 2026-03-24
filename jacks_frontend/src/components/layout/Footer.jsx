@@ -1,9 +1,10 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
+import toast from 'react-hot-toast';
 import { FaFacebook, FaInstagram, FaMapMarkerAlt, FaPhone, FaEnvelope, FaClock } from 'react-icons/fa';
 import { FaTiktok } from 'react-icons/fa6';
 import logoImg from '../../assets/images/JN L 2.png';
-import { settingsAPI } from '../../services/api';
+import { settingsAPI, newsletterAPI } from '../../services/api';
 
 const quickLinks = [
   { to: '/menu',        label: 'Menu' },
@@ -33,9 +34,22 @@ export default function Footer() {
       .catch(() => {});
   }, []);
 
-  const handleNewsletter = (e) => {
+  const [nlSubmitting, setNlSubmitting] = useState(false);
+
+  const handleNewsletter = async (e) => {
     e.preventDefault();
-    e.target.reset();
+    const email = e.target.elements.email.value.trim();
+    if (!email) return;
+    setNlSubmitting(true);
+    try {
+      await newsletterAPI.subscribe(email, '');
+      toast.success('Subscribed successfully!');
+      e.target.reset();
+    } catch {
+      toast.error('Subscription failed. Please try again.');
+    } finally {
+      setNlSubmitting(false);
+    }
   };
 
   return (
@@ -128,12 +142,13 @@ export default function Footer() {
             <form onSubmit={handleNewsletter} className="space-y-3">
               <input
                 type="email"
+                name="email"
                 required
                 placeholder="Your email address"
                 className="w-full bg-white border border-stone-200 text-pub-text placeholder-stone-400 px-4 py-3 text-sm focus:outline-none focus:border-pub-gold rounded-sm transition-colors"
               />
-              <button type="submit" className="btn-primary w-full text-center text-xs">
-                Subscribe
+              <button type="submit" disabled={nlSubmitting} className="btn-primary w-full text-center text-xs disabled:opacity-50">
+                {nlSubmitting ? 'Subscribing...' : 'Subscribe'}
               </button>
             </form>
           </div>

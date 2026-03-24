@@ -2,7 +2,7 @@ package com.jacksnorwood.jacks_backend.dto;
 
 import com.jacksnorwood.jacks_backend.entity.PromotionType;
 import lombok.Data;
-import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 @Data
 public class PromotionDTO {
@@ -10,9 +10,9 @@ public class PromotionDTO {
     private String title;
     private String description;
     private String imageUrl;
-    private String discount;
-    private LocalDate startDate;
-    private LocalDate endDate;
+    private LocalDateTime startDateTime;
+    private LocalDateTime endDateTime;
     private Boolean active;
     private PromotionType promotionType;
+    private String dayOfWeek;
 }

@@ -2,7 +2,7 @@ package com.jacksnorwood.jacks_backend.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
-import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "promotions")
@@ -23,11 +23,10 @@ public class Promotion {
 
     private String imageUrl;
 
-    private String discount;
+    // startDateTime / endDateTime used only for SPECIAL type (date+time range filtering)
+    private LocalDateTime startDateTime;
 
-    private LocalDate startDate;
-
-    private LocalDate endDate;
+    private LocalDateTime endDateTime;
 
     @Builder.Default
     private Boolean active = true;
@@ -35,4 +34,7 @@ public class Promotion {
     @Enumerated(EnumType.STRING)
     @Builder.Default
     private PromotionType promotionType = PromotionType.SPECIAL;
+
+    // Only for DAILY type — e.g. "MONDAY", "TUESDAY", etc.
+    private String dayOfWeek;
 }

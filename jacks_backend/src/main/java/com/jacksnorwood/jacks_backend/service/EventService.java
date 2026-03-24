@@ -14,6 +14,7 @@ import java.util.stream.Collectors;
 public class EventService {
 
     private final EventRepository eventRepository;
+    private final NewsletterService newsletterService;
 
     public List<EventDTO> getUpcomingEvents() {
         return eventRepository.findByActiveTrueOrderByDateAsc().stream().map(this::toDTO).collect(Collectors.toList());
@@ -29,7 +30,13 @@ public class EventService {
                 .imageUrl(dto.getImageUrl()).date(dto.getDate()).time(dto.getTime())
                 .reservationLink(dto.getReservationLink())
                 .active(dto.getActive() != null ? dto.getActive() : true).build();
-        return toDTO(eventRepository.save(e));
+        EventDTO saved = toDTO(eventRepository.save(e));
+        try {
+            String body = (saved.getDescription() != null && !saved.getDescription().isBlank())
+                    ? saved.getDescription() : "Visit us for this exciting event!";
+            newsletterService.notifySubscribers("New Event: " + saved.getTitle(), body);
+        } catch (Exception ignored) {}
+        return saved;
     }
 
     public EventDTO update(Long id, EventDTO dto) {

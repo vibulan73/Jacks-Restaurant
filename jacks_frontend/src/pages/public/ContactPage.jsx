@@ -16,6 +16,7 @@ export default function ContactPage() {
   const fileRef = useRef(null);
 
   const subject = watch('subject', 'General');
+  const isCareer = subject === 'Career';
 
   const handleCvChange = async (e) => {
     const file = e.target.files[0];
@@ -50,7 +51,8 @@ export default function ContactPage() {
 
   return (
     <div className="min-h-screen pt-20">
-      <div className="relative py-24 bg-cover bg-center" style={{ backgroundImage: "url('https://images.unsplash.com/photo-1537047902294-62a40c20a6ae?w=1920&q=80')" }}>
+      <div className="relative py-24 bg-cover bg-center"
+        style={{ backgroundImage: "url('https://images.unsplash.com/photo-1537047902294-62a40c20a6ae?w=1920&q=80')" }}>
         <div className="absolute inset-0 bg-gradient-to-b from-black/55 via-black/35 to-pub-light/90" />
         <div className="relative z-10 text-center">
           <SectionHeader subtitle="Get in Touch" title="Contact Us" description="We'd love to hear from you" light={true} />
@@ -63,15 +65,13 @@ export default function ContactPage() {
           <motion.div initial={{ opacity: 0, x: -30 }} animate={{ opacity: 1, x: 0 }} transition={{ duration: 0.6 }}>
             <h2 className="font-display text-pub-text text-3xl font-bold mb-8">Send Us a Message</h2>
             <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
-              <div>
-                <select {...register('subject')} className={inputCls}>
-                  {SUBJECTS.map(s => <option key={s} value={s}>{s}</option>)}
-                </select>
-              </div>
+              {/* Name */}
               <div>
                 <input {...register('name', { required: 'Name is required' })} placeholder="Your Name *" className={inputCls} />
                 {errors.name && <p className={errorCls}>{errors.name.message}</p>}
               </div>
+
+              {/* Email */}
               <div>
                 <input
                   {...register('email', { required: 'Email is required', pattern: { value: /^\S+@\S+$/i, message: 'Invalid email' } })}
@@ -80,21 +80,21 @@ export default function ContactPage() {
                 />
                 {errors.email && <p className={errorCls}>{errors.email.message}</p>}
               </div>
-              <div>
-                <input {...register('phone')} placeholder="Phone Number" className={inputCls} />
-              </div>
-              <div>
-                <textarea
-                  {...register('message', { required: 'Message is required', minLength: { value: 10, message: 'Message too short' } })}
-                  placeholder="Your Message *"
-                  rows={6}
-                  className={inputCls + ' resize-none'}
-                />
-                {errors.message && <p className={errorCls}>{errors.message.message}</p>}
+
+              {/* Phone + Subject (side by side) */}
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <input {...register('phone')} placeholder="Phone Number" className={inputCls} />
+                </div>
+                <div>
+                  <select {...register('subject')} className={inputCls}>
+                    {SUBJECTS.map(s => <option key={s} value={s}>{s}</option>)}
+                  </select>
+                </div>
               </div>
 
-              {/* CV Upload — Career only */}
-              {subject === 'Career' && (
+              {/* CV Upload — Career only (BEFORE message) */}
+              {isCareer && (
                 <motion.div
                   initial={{ opacity: 0, height: 0 }}
                   animate={{ opacity: 1, height: 'auto' }}
@@ -133,6 +133,17 @@ export default function ContactPage() {
                   )}
                 </motion.div>
               )}
+
+              {/* Message (always shown, but after CV for career) */}
+              <div>
+                <textarea
+                  {...register('message', { required: 'Message is required', minLength: { value: 10, message: 'Message too short' } })}
+                  placeholder={isCareer ? 'Cover Letter / Additional Notes *' : 'Your Message *'}
+                  rows={6}
+                  className={inputCls + ' resize-none'}
+                />
+                {errors.message && <p className={errorCls}>{errors.message.message}</p>}
+              </div>
 
               <button type="submit" disabled={isSubmitting || cvUploading} className="btn-primary w-full disabled:opacity-50">
                 {isSubmitting ? 'Sending...' : 'Send Message'}
@@ -181,7 +192,6 @@ export default function ContactPage() {
               </div>
             </div>
 
-            {/* Map */}
             {import.meta.env.VITE_GOOGLE_MAPS_EMBED_URL?.trim() ? (
               <div className="rounded-xl overflow-hidden border border-stone-200 h-60 shadow-sm">
                 <iframe

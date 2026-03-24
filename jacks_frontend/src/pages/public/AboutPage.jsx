@@ -1,7 +1,11 @@
+import { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
 import { FaHeart, FaUsers, FaAward, FaBeer } from 'react-icons/fa';
 import SectionHeader from '../../components/ui/SectionHeader';
 import { Link } from 'react-router-dom';
+import { teamAPI, resolveImageUrl } from '../../services/api';
+
+const FALLBACK = 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=400&h=400&fit=crop';
 
 const stats = [
   { icon: FaAward, value: '10+', label: 'Years Serving Norwood' },
@@ -10,14 +14,12 @@ const stats = [
   { icon: FaHeart, value: '100%', label: 'Local & Proud' },
 ];
 
-const team = [
-  { name: 'Jack Morrison', role: 'Owner & Head Chef', img: 'https://images.unsplash.com/photo-1583394293214-fb0f19ba7f6f?w=400&h=400&fit=crop&q=80' },
-  { name: 'Sarah Chen', role: 'Head Bartender', img: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=400&h=400&fit=crop&q=80' },
-  { name: 'Marco Rossi', role: 'Executive Chef', img: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400&h=400&fit=crop&q=80' },
-  { name: 'Emma Wilson', role: 'Events Manager', img: 'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=400&h=400&fit=crop&q=80' },
-];
-
 export default function AboutPage() {
+  const [team, setTeam] = useState([]);
+
+  useEffect(() => {
+    teamAPI.getAll().then(r => setTeam(r.data)).catch(() => {});
+  }, []);
   return (
     <div className="min-h-screen pt-20">
       {/* Hero */}
@@ -99,38 +101,45 @@ export default function AboutPage() {
       </section>
 
       {/* Team */}
-      <section className="py-20 bg-white/60">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <SectionHeader subtitle="Meet the Crew" title="Our Team" description="The passionate people behind every great meal and memorable evening" />
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-8">
-            {team.map((member, i) => (
-              <motion.div
-                key={i}
-                initial={{ opacity: 0, y: 30 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ delay: i * 0.1 }}
-                className="text-center group"
-              >
-                <div className="relative w-36 h-36 mx-auto mb-4 overflow-hidden rounded-full border-2 border-pub-gold/30 group-hover:border-pub-gold transition-all duration-300 shadow-sm">
-                  <img src={member.img} alt={member.name} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" />
-                </div>
-                <h3 className="font-display text-pub-text text-lg font-semibold">{member.name}</h3>
-                <p className="text-pub-gold text-sm mt-1">{member.role}</p>
-              </motion.div>
-            ))}
+      {team.length > 0 && (
+        <section className="py-20 bg-white/60">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <SectionHeader subtitle="Meet the Crew" title="Our Team" description="The passionate people behind every great meal and memorable evening" />
+            <div className="grid grid-cols-2 lg:grid-cols-4 gap-8">
+              {team.map((member, i) => (
+                <motion.div
+                  key={member.id}
+                  initial={{ opacity: 0, y: 30 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ delay: i * 0.1 }}
+                  className="text-center group"
+                >
+                  <div className="relative w-36 h-36 mx-auto mb-4 overflow-hidden rounded-full border-2 border-pub-gold/30 group-hover:border-pub-gold transition-all duration-300 shadow-sm">
+                    <img
+                      src={resolveImageUrl(member.imageUrl) || FALLBACK}
+                      alt={member.name}
+                      className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+                      onError={e => { e.target.src = FALLBACK; }}
+                    />
+                  </div>
+                  <h3 className="font-display text-pub-text text-lg font-semibold">{member.name}</h3>
+                  <p className="text-pub-gold text-sm mt-1">{member.position}</p>
+                </motion.div>
+              ))}
+            </div>
           </div>
-        </div>
-      </section>
+        </section>
+      )}
 
       {/* CTA */}
       <section className="py-20 bg-white/70 border-y border-stone-200">
         <div className="max-w-4xl mx-auto px-4 text-center">
           <h2 className="section-title mb-4">Come Visit Us</h2>
-          <p className="text-stone-500 text-lg mb-8">We'd love to have you. Book a table or just walk in — you're always welcome at Jack's.</p>
+          <p className="text-stone-500 text-lg mb-8">We'd love to have you. Just walk in or get in touch — you're always welcome at Jack's.</p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Link to="/reservation" className="btn-primary">Book a Table</Link>
-            <Link to="/contact" className="btn-outline">Get in Touch</Link>
+            <Link to="/contact" className="btn-primary">Get in Touch</Link>
+            <Link to="/menu" className="btn-outline">View Our Menu</Link>
           </div>
         </div>
       </section>

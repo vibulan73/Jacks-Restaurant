@@ -3,6 +3,8 @@ package com.jacksnorwood.jacks_backend.entity;
 import jakarta.persistence.*;
 import lombok.*;
 import java.math.BigDecimal;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Table(name = "menu_items")
@@ -24,13 +26,17 @@ public class MenuItem {
     @Column(nullable = false)
     private BigDecimal price;
 
-    private String imageUrl;
-
-    private String subcategory;
-
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "category_id")
     private MenuCategory category;
+
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "subcategory_id")
+    private MenuSubcategory subcategory;
+
+    @Builder.Default
+    @OneToMany(mappedBy = "menuItem", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
+    private List<ItemSize> sizes = new ArrayList<>();
 
     @Builder.Default
     private Boolean isPopular = false;
