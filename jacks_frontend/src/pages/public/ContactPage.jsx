@@ -5,18 +5,31 @@ import toast from 'react-hot-toast';
 import { FaMapMarkerAlt, FaPhone, FaEnvelope, FaClock, FaUpload, FaCheckCircle } from 'react-icons/fa';
 import { contactAPI, uploadAPI } from '../../services/api';
 import SectionHeader from '../../components/ui/SectionHeader';
+import {
+  FALLBACK_IMAGE,
+  RESTAURANT_ADDRESS,
+  RESTAURANT_PHONE,
+  RESTAURANT_EMAIL,
+  OPENING_HOURS,
+} from "../../config/constants";
 
-const SUBJECTS = ['General', 'Feedback', 'Career'];
+const SUBJECTS = ["General", "Feedback", "Career"];
 
 export default function ContactPage() {
-  const { register, handleSubmit, reset, watch, formState: { errors, isSubmitting } } = useForm();
+  const {
+    register,
+    handleSubmit,
+    reset,
+    watch,
+    formState: { errors, isSubmitting },
+  } = useForm();
   const [cvFile, setCvFile] = useState(null);
   const [cvUploading, setCvUploading] = useState(false);
-  const [cvUrl, setCvUrl] = useState('');
+  const [cvUrl, setCvUrl] = useState("");
   const fileRef = useRef(null);
 
-  const subject = watch('subject', 'General');
-  const isCareer = subject === 'Career';
+  const subject = watch("subject", "General");
+  const isCareer = subject === "Career";
 
   const handleCvChange = async (e) => {
     const file = e.target.files[0];
@@ -27,7 +40,7 @@ export default function ContactPage() {
       const res = await uploadAPI.upload(file);
       setCvUrl(res.data.url);
     } catch {
-      toast.error('CV upload failed. Please try again.');
+      toast.error("CV upload failed. Please try again.");
       setCvFile(null);
     } finally {
       setCvUploading(false);
@@ -40,55 +53,88 @@ export default function ContactPage() {
       toast.success("Message sent! We'll get back to you soon.");
       reset();
       setCvFile(null);
-      setCvUrl('');
+      setCvUrl("");
     } catch {
-      toast.error('Failed to send message. Please try again.');
+      toast.error("Failed to send message. Please try again.");
     }
   };
 
-  const inputCls = 'w-full bg-white border border-stone-200 text-pub-text placeholder-stone-400 px-4 py-3 rounded-lg focus:outline-none focus:border-pub-gold transition-colors duration-200 shadow-sm';
-  const errorCls = 'text-red-500 text-xs mt-1';
+  const inputCls =
+    "w-full bg-white border border-stone-200 text-pub-text placeholder-stone-400 px-4 py-3 rounded-lg focus:outline-none focus:border-pub-gold transition-colors duration-200 shadow-sm";
+  const errorCls = "text-red-500 text-xs mt-1";
 
   return (
     <div className="min-h-screen pt-20">
-      <div className="relative py-24 bg-cover bg-center"
-        style={{ backgroundImage: "url('https://images.unsplash.com/photo-1537047902294-62a40c20a6ae?w=1920&q=80')" }}>
+      <div
+        className="relative py-24 bg-cover bg-center"
+        style={{ backgroundImage: `url('${FALLBACK_IMAGE}')` }}
+      >
         <div className="absolute inset-0 bg-gradient-to-b from-black/55 via-black/35 to-pub-light/90" />
         <div className="relative z-10 text-center">
-          <SectionHeader subtitle="Get in Touch" title="Contact Us" description="We'd love to hear from you" light={true} />
+          <SectionHeader
+            subtitle="Get in Touch"
+            title="Contact Us"
+            description="We'd love to hear from you"
+            light={true}
+          />
         </div>
       </div>
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-16">
           {/* Form */}
-          <motion.div initial={{ opacity: 0, x: -30 }} animate={{ opacity: 1, x: 0 }} transition={{ duration: 0.6 }}>
-            <h2 className="font-display text-pub-text text-3xl font-bold mb-8">Send Us a Message</h2>
+          <motion.div
+            initial={{ opacity: 0, x: -30 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ duration: 0.6 }}
+          >
+            <h2 className="font-display text-pub-text text-3xl font-bold mb-8">
+              Send Us a Message
+            </h2>
             <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
               {/* Name */}
               <div>
-                <input {...register('name', { required: 'Name is required' })} placeholder="Your Name *" className={inputCls} />
-                {errors.name && <p className={errorCls}>{errors.name.message}</p>}
+                <input
+                  {...register("name", { required: "Name is required" })}
+                  placeholder="Your Name *"
+                  className={inputCls}
+                />
+                {errors.name && (
+                  <p className={errorCls}>{errors.name.message}</p>
+                )}
               </div>
 
               {/* Email */}
               <div>
                 <input
-                  {...register('email', { required: 'Email is required', pattern: { value: /^\S+@\S+$/i, message: 'Invalid email' } })}
+                  {...register("email", {
+                    required: "Email is required",
+                    pattern: { value: /^\S+@\S+$/i, message: "Invalid email" },
+                  })}
                   placeholder="Email Address *"
                   className={inputCls}
                 />
-                {errors.email && <p className={errorCls}>{errors.email.message}</p>}
+                {errors.email && (
+                  <p className={errorCls}>{errors.email.message}</p>
+                )}
               </div>
 
               {/* Phone + Subject (side by side) */}
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <input {...register('phone')} placeholder="Phone Number" className={inputCls} />
+                  <input
+                    {...register("phone")}
+                    placeholder="Phone Number"
+                    className={inputCls}
+                  />
                 </div>
                 <div>
-                  <select {...register('subject')} className={inputCls}>
-                    {SUBJECTS.map(s => <option key={s} value={s}>{s}</option>)}
+                  <select {...register("subject")} className={inputCls}>
+                    {SUBJECTS.map((s) => (
+                      <option key={s} value={s}>
+                        {s}
+                      </option>
+                    ))}
                   </select>
                 </div>
               </div>
@@ -97,7 +143,7 @@ export default function ContactPage() {
               {isCareer && (
                 <motion.div
                   initial={{ opacity: 0, height: 0 }}
-                  animate={{ opacity: 1, height: 'auto' }}
+                  animate={{ opacity: 1, height: "auto" }}
                   exit={{ opacity: 0, height: 0 }}
                   transition={{ duration: 0.3 }}
                 >
@@ -111,10 +157,16 @@ export default function ContactPage() {
                   {cvFile && cvUrl ? (
                     <div className="flex items-center gap-3 bg-green-50 border border-green-200 rounded-lg px-4 py-3">
                       <FaCheckCircle className="text-green-500 flex-shrink-0" />
-                      <span className="text-green-700 text-sm font-medium truncate">{cvFile.name}</span>
+                      <span className="text-green-700 text-sm font-medium truncate">
+                        {cvFile.name}
+                      </span>
                       <button
                         type="button"
-                        onClick={() => { setCvFile(null); setCvUrl(''); if (fileRef.current) fileRef.current.value = ''; }}
+                        onClick={() => {
+                          setCvFile(null);
+                          setCvUrl("");
+                          if (fileRef.current) fileRef.current.value = "";
+                        }}
                         className="ml-auto text-stone-400 hover:text-red-500 text-xs transition-colors"
                       >
                         Remove
@@ -128,7 +180,9 @@ export default function ContactPage() {
                       className="w-full flex items-center justify-center gap-2 border-2 border-dashed border-stone-300 hover:border-pub-gold text-stone-500 hover:text-pub-gold rounded-lg px-4 py-3 text-sm font-medium transition-all duration-200 disabled:opacity-50"
                     >
                       <FaUpload size={14} />
-                      {cvUploading ? 'Uploading CV...' : 'Attach CV / Resume (PDF, DOC)'}
+                      {cvUploading
+                        ? "Uploading CV..."
+                        : "Attach CV / Resume (PDF, DOC)"}
                     </button>
                   )}
                 </motion.div>
@@ -137,37 +191,77 @@ export default function ContactPage() {
               {/* Message (always shown, but after CV for career) */}
               <div>
                 <textarea
-                  {...register('message', { required: 'Message is required', minLength: { value: 10, message: 'Message too short' } })}
-                  placeholder={isCareer ? 'Cover Letter / Additional Notes *' : 'Your Message *'}
+                  {...register("message", {
+                    required: "Message is required",
+                    minLength: { value: 10, message: "Message too short" },
+                  })}
+                  placeholder={
+                    isCareer
+                      ? "Cover Letter / Additional Notes *"
+                      : "Your Message *"
+                  }
                   rows={6}
-                  className={inputCls + ' resize-none'}
+                  className={inputCls + " resize-none"}
                 />
-                {errors.message && <p className={errorCls}>{errors.message.message}</p>}
+                {errors.message && (
+                  <p className={errorCls}>{errors.message.message}</p>
+                )}
               </div>
 
-              <button type="submit" disabled={isSubmitting || cvUploading} className="btn-primary w-full disabled:opacity-50">
-                {isSubmitting ? 'Sending...' : 'Send Message'}
+              <button
+                type="submit"
+                disabled={isSubmitting || cvUploading}
+                className="btn-primary w-full disabled:opacity-50"
+              >
+                {isSubmitting ? "Sending..." : "Send Message"}
               </button>
             </form>
           </motion.div>
 
           {/* Info */}
-          <motion.div initial={{ opacity: 0, x: 30 }} animate={{ opacity: 1, x: 0 }} transition={{ duration: 0.6 }}>
-            <h2 className="font-display text-pub-text text-3xl font-bold mb-8">Restaurant Info</h2>
+          <motion.div
+            initial={{ opacity: 0, x: 30 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ duration: 0.6 }}
+          >
+            <h2 className="font-display text-pub-text text-3xl font-bold mb-8">
+              Restaurant Info
+            </h2>
             <div className="space-y-6 mb-10">
               {[
-                { icon: FaMapMarkerAlt, title: 'Address', content: '123 The Parade, Norwood SA 5067, Australia' },
-                { icon: FaPhone, title: 'Phone', content: '(08) 8234 5678', href: 'tel:+61882345678' },
-                { icon: FaEnvelope, title: 'Email', content: 'info@jacksnorwood.com.au', href: 'mailto:info@jacksnorwood.com.au' },
+                {
+                  icon: FaMapMarkerAlt,
+                  title: "Address",
+                  content: RESTAURANT_ADDRESS,
+                },
+                {
+                  icon: FaPhone,
+                  title: "Phone",
+                  content: RESTAURANT_PHONE,
+                  href: `tel:${RESTAURANT_PHONE}`,
+                },
+                {
+                  icon: FaEnvelope,
+                  title: "Email",
+                  content: RESTAURANT_EMAIL,
+                  href: `mailto:${RESTAURANT_EMAIL}`,
+                },
               ].map(({ icon: Icon, title, content, href }) => (
                 <div key={title} className="flex items-start gap-4">
                   <div className="w-10 h-10 bg-pub-gold/10 border border-pub-gold/30 rounded-lg flex items-center justify-center flex-shrink-0">
                     <Icon className="text-pub-gold" size={16} />
                   </div>
                   <div>
-                    <p className="text-stone-400 text-xs uppercase tracking-wider mb-1">{title}</p>
+                    <p className="text-stone-400 text-xs uppercase tracking-wider mb-1">
+                      {title}
+                    </p>
                     {href ? (
-                      <a href={href} className="text-pub-text hover:text-pub-gold transition-colors">{content}</a>
+                      <a
+                        href={href}
+                        className="text-pub-text hover:text-pub-gold transition-colors"
+                      >
+                        {content}
+                      </a>
                     ) : (
                       <p className="text-pub-text">{content}</p>
                     )}
@@ -179,12 +273,16 @@ export default function ContactPage() {
                   <FaClock className="text-pub-gold" size={16} />
                 </div>
                 <div>
-                  <p className="text-stone-400 text-xs uppercase tracking-wider mb-2">Opening Hours</p>
+                  <p className="text-stone-400 text-xs uppercase tracking-wider mb-2">
+                    Opening Hours
+                  </p>
                   <div className="space-y-1 text-sm">
-                    {[['Mon – Thu', '11:00 AM – 10:00 PM'], ['Fri – Sat', '11:00 AM – 12:00 AM'], ['Sunday', '12:00 PM – 9:00 PM']].map(([d, t]) => (
-                      <div key={d} className="flex justify-between gap-6">
-                        <span className="text-stone-500">{d}</span>
-                        <span className="text-pub-gold font-medium">{t}</span>
+                    {OPENING_HOURS.map(({ day, time }) => (
+                      <div key={day} className="flex justify-between gap-6">
+                        <span className="text-stone-500">{day}</span>
+                        <span className="text-pub-gold font-medium">
+                          {time}
+                        </span>
                       </div>
                     ))}
                   </div>
@@ -208,7 +306,7 @@ export default function ContactPage() {
               </div>
             ) : (
               <a
-                href={`https://maps.google.com/?q=${encodeURIComponent(import.meta.env.VITE_RESTAURANT_ADDRESS || '123 The Parade, Norwood SA 5067')}`}
+                href={`https://maps.google.com/?q=${encodeURIComponent(RESTAURANT_ADDRESS)}`}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="flex items-center justify-center gap-3 h-60 rounded-xl border border-stone-200 bg-stone-50 text-stone-400 hover:text-pub-gold hover:border-pub-gold/30 transition-all duration-200 text-sm shadow-sm"

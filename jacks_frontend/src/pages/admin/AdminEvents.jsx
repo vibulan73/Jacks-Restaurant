@@ -5,8 +5,9 @@ import { eventAPI } from '../../services/api';
 import { HiPlus, HiPencil, HiTrash, HiX } from 'react-icons/hi';
 import { FaCalendarAlt, FaClock } from 'react-icons/fa';
 import ImageUpload from '../../components/ui/ImageUpload';
+import { FALLBACK_IMAGE } from "../../config/constants";
 
-const FALLBACK = 'https://images.unsplash.com/photo-1516450360452-9312f5e86fc7?w=300&h=180&fit=crop';
+const FALLBACK = FALLBACK_IMAGE;
 
 export default function AdminEvents() {
   const [events, setEvents] = useState([]);

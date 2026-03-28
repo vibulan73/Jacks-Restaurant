@@ -5,29 +5,47 @@ import { FaCalendarAlt, FaClock, FaTicketAlt } from 'react-icons/fa';
 import { eventAPI } from '../../services/api';
 import SectionHeader from '../../components/ui/SectionHeader';
 import LoadingSpinner from '../../components/ui/LoadingSpinner';
+import { FALLBACK_IMAGE } from "../../config/constants";
 
-const FALLBACK = 'https://images.unsplash.com/photo-1516450360452-9312f5e86fc7?w=800&h=400&fit=crop';
+const FALLBACK = FALLBACK_IMAGE;
 
 export default function EventsPage() {
   const [events, setEvents] = useState([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    eventAPI.getUpcoming()
-      .then(r => setEvents(r.data))
+    eventAPI
+      .getUpcoming()
+      .then((r) => setEvents(r.data))
       .catch(console.error)
       .finally(() => setLoading(false));
   }, []);
 
-  const formatDate = (d) => d ? new Date(d).toLocaleDateString('en-AU', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' }) : '';
-  const formatTime = (t) => t ? t.slice(0, 5) : '';
+  const formatDate = (d) =>
+    d
+      ? new Date(d).toLocaleDateString("en-AU", {
+          weekday: "long",
+          day: "numeric",
+          month: "long",
+          year: "numeric",
+        })
+      : "";
+  const formatTime = (t) => (t ? t.slice(0, 5) : "");
 
   return (
     <div className="min-h-screen pt-20">
-      <div className="relative py-24 bg-cover bg-center" style={{ backgroundImage: "url('https://images.unsplash.com/photo-1470229538611-16ba8c7ffbd7?w=1920&q=80')" }}>
+      <div
+        className="relative py-24 bg-cover bg-center"
+        style={{ backgroundImage: `url('${FALLBACK_IMAGE}')` }}
+      >
         <div className="absolute inset-0 bg-gradient-to-b from-black/55 via-black/35 to-pub-light/90" />
         <div className="relative z-10 text-center">
-          <SectionHeader subtitle="What's On" title="Upcoming Events" description="Live music, trivia nights, sports events and more" light={true} />
+          <SectionHeader
+            subtitle="What's On"
+            title="Upcoming Events"
+            description="Live music, trivia nights, sports events and more"
+            light={true}
+          />
         </div>
       </div>
 
@@ -37,7 +55,9 @@ export default function EventsPage() {
         ) : events.length === 0 ? (
           <div className="text-center text-stone-400 py-20">
             <p className="text-xl">No upcoming events</p>
-            <p className="text-sm mt-2">Stay tuned — something exciting is always in the works!</p>
+            <p className="text-sm mt-2">
+              Stay tuned — something exciting is always in the works!
+            </p>
           </div>
         ) : (
           <div className="space-y-8">
@@ -55,7 +75,9 @@ export default function EventsPage() {
                     src={event.imageUrl || FALLBACK}
                     alt={event.title}
                     className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                    onError={e => { e.target.src = FALLBACK; }}
+                    onError={(e) => {
+                      e.target.src = FALLBACK;
+                    }}
                   />
                 </div>
                 <div className="p-8 flex flex-col justify-between flex-1">
@@ -74,12 +96,21 @@ export default function EventsPage() {
                         </div>
                       )}
                     </div>
-                    <h3 className="font-display text-pub-text text-3xl font-bold mb-3">{event.title}</h3>
-                    <p className="text-stone-500 leading-relaxed">{event.description}</p>
+                    <h3 className="font-display text-pub-text text-3xl font-bold mb-3">
+                      {event.title}
+                    </h3>
+                    <p className="text-stone-500 leading-relaxed">
+                      {event.description}
+                    </p>
                   </div>
                   {event.reservationLink && (
                     <div className="mt-6 flex gap-4">
-                      <a href={event.reservationLink} target="_blank" rel="noopener noreferrer" className="btn-primary flex items-center gap-2">
+                      <a
+                        href={event.reservationLink}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="btn-primary flex items-center gap-2"
+                      >
                         <FaTicketAlt /> Reserve Your Spot
                       </a>
                     </div>

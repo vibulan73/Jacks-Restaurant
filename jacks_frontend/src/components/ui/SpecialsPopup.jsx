@@ -3,8 +3,9 @@ import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { FaTimes } from 'react-icons/fa';
 import { promotionAPI } from '../../services/api';
+import { FALLBACK_IMAGE } from "../../config/constants";
 
-const FALLBACK = 'https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=800&h=500&fit=crop';
+const FALLBACK = FALLBACK_IMAGE;
 
 export default function SpecialsPopup() {
   const [visible, setVisible] = useState(false);

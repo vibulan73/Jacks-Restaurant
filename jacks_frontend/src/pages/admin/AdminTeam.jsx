@@ -3,8 +3,9 @@ import toast from 'react-hot-toast';
 import { teamAPI, uploadAPI, resolveImageUrl } from '../../services/api';
 import { HiPlus, HiPencil, HiTrash, HiX } from 'react-icons/hi';
 import { FaUpload } from 'react-icons/fa';
+import { FALLBACK_IMAGE } from "../../config/constants";
 
-const FALLBACK = 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=200&h=200&fit=crop';
+const FALLBACK = FALLBACK_IMAGE;
 
 const emptyForm = { name: '', position: '', imageUrl: '', displayOrder: '' };
 

@@ -1,12 +1,29 @@
 import { useEffect, useState, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { FaMapMarkerAlt, FaPhone, FaClock, FaStar, FaQuoteLeft, FaChevronLeft, FaChevronRight } from 'react-icons/fa';
-import { menuAPI, promotionAPI, heroImageAPI, resolveImageUrl } from '../../services/api';
-import heroImg from '../../image/IMG_0327_denoiser.jpeg';
-import MenuItemCard from '../../components/ui/MenuItemCard';
-import SectionHeader from '../../components/ui/SectionHeader';
-import SpecialsPopup from '../../components/ui/SpecialsPopup';
+import {
+  FaMapMarkerAlt,
+  FaPhone,
+  FaClock,
+  FaChevronLeft,
+  FaChevronRight,
+} from "react-icons/fa";
+import {
+  menuAPI,
+  promotionAPI,
+  heroImageAPI,
+  resolveImageUrl,
+} from "../../services/api";
+import heroImg from "../../image/IMG_0327_denoiser.jpeg";
+import MenuItemCard from "../../components/ui/MenuItemCard";
+import SectionHeader from "../../components/ui/SectionHeader";
+import SpecialsPopup from "../../components/ui/SpecialsPopup";
+import {
+  FALLBACK_IMAGE,
+  RESTAURANT_PHONE,
+  RESTAURANT_ADDRESS,
+  OPENING_HOURS,
+} from "../../config/constants";
 
 const fadeUp = {
   hidden: { opacity: 0, y: 40 },
@@ -16,13 +33,6 @@ const fadeUp = {
 const stagger = {
   visible: { transition: { staggerChildren: 0.15 } },
 };
-
-const reviews = [
-  { name: 'Sarah M.', rating: 5, text: 'Absolutely love this place! The wings are the best in Adelaide and the atmosphere is incredible.', date: '2 weeks ago' },
-  { name: 'James T.', rating: 5, text: "Jack's Norwood is our go-to spot for Friday nights. Amazing burgers and fantastic live music!", date: '1 month ago' },
-  { name: 'Emily R.', rating: 5, text: 'The staff are so friendly and the food is always fresh. The cocktails are to die for!', date: '3 weeks ago' },
-  { name: 'Michael K.', rating: 4, text: 'Great pub with a proper local feel. Love the sports nights and the Happy Hour deals.', date: '1 week ago' },
-];
 
 export default function HomePage() {
   const [popularItems, setPopularItems] = useState([]);
@@ -34,9 +44,9 @@ export default function HomePage() {
 
   useEffect(() => {
     Promise.all([
-      menuAPI.getPopular().then(r => setPopularItems(r.data.slice(0, 6))),
-      promotionAPI.getActive().then(r => setPromotions(r.data.slice(0, 3))),
-      heroImageAPI.getActive().then(r => setHeroImages(r.data)),
+      menuAPI.getPopular().then((r) => setPopularItems(r.data.slice(0, 6))),
+      promotionAPI.getActive().then((r) => setPromotions(r.data.slice(0, 3))),
+      heroImageAPI.getActive().then((r) => setHeroImages(r.data)),
     ])
       .catch(console.error)
       .finally(() => setLoadingMenu(false));
@@ -46,23 +56,24 @@ export default function HomePage() {
   useEffect(() => {
     if (heroImages.length <= 1) return;
     timerRef.current = setInterval(() => {
-      setHeroIndex(i => (i + 1) % heroImages.length);
+      setHeroIndex((i) => (i + 1) % heroImages.length);
     }, 10000);
     return () => clearInterval(timerRef.current);
   }, [heroImages]);
 
   const heroPrev = () => {
     clearInterval(timerRef.current);
-    setHeroIndex(i => (i - 1 + heroImages.length) % heroImages.length);
+    setHeroIndex((i) => (i - 1 + heroImages.length) % heroImages.length);
   };
   const heroNext = () => {
     clearInterval(timerRef.current);
-    setHeroIndex(i => (i + 1) % heroImages.length);
+    setHeroIndex((i) => (i + 1) % heroImages.length);
   };
 
-  const heroBg = heroImages.length > 0
-    ? resolveImageUrl(heroImages[heroIndex].imageUrl)
-    : (import.meta.env.VITE_HERO_IMAGE_URL || heroImg);
+  const heroBg =
+    heroImages.length > 0
+      ? resolveImageUrl(heroImages[heroIndex].imageUrl)
+      : import.meta.env.VITE_HERO_IMAGE_URL || heroImg;
 
   return (
     <div>
@@ -105,8 +116,11 @@ export default function HomePage() {
               {heroImages.map((_, i) => (
                 <button
                   key={i}
-                  onClick={() => { clearInterval(timerRef.current); setHeroIndex(i); }}
-                  className={`w-2 h-2 rounded-full transition-all duration-300 ${i === heroIndex ? 'bg-pub-gold w-6' : 'bg-white/50'}`}
+                  onClick={() => {
+                    clearInterval(timerRef.current);
+                    setHeroIndex(i);
+                  }}
+                  className={`w-2 h-2 rounded-full transition-all duration-300 ${i === heroIndex ? "bg-pub-gold w-6" : "bg-white/50"}`}
                 />
               ))}
             </div>
@@ -116,12 +130,17 @@ export default function HomePage() {
         {/* Floating decorative circles */}
         <motion.div
           animate={{ y: [0, -18, 0], opacity: [0.2, 0.45, 0.2] }}
-          transition={{ repeat: Infinity, duration: 5, ease: 'easeInOut' }}
+          transition={{ repeat: Infinity, duration: 5, ease: "easeInOut" }}
           className="absolute top-1/4 left-16 w-24 h-24 rounded-full border border-pub-gold/30 hidden lg:block pointer-events-none"
         />
         <motion.div
           animate={{ y: [0, 14, 0], opacity: [0.15, 0.35, 0.15] }}
-          transition={{ repeat: Infinity, duration: 7, ease: 'easeInOut', delay: 1 }}
+          transition={{
+            repeat: Infinity,
+            duration: 7,
+            ease: "easeInOut",
+            delay: 1,
+          }}
           className="absolute bottom-1/3 right-20 w-16 h-16 rounded-full bg-pub-gold/15 hidden lg:block pointer-events-none"
         />
 
@@ -140,12 +159,11 @@ export default function HomePage() {
             transition={{ duration: 0.8, delay: 0.2 }}
             className="font-display text-5xl md:text-7xl lg:text-8xl text-white font-bold leading-tight mb-4 drop-shadow-lg"
           >
-            Jack's{' '}
-            <span className="text-gradient">Norwood</span>
+            Jack's <span className="text-gradient">Norwood</span>
           </motion.h1>
           <motion.div
             initial={{ width: 0 }}
-            animate={{ width: '4rem' }}
+            animate={{ width: "4rem" }}
             transition={{ duration: 0.8, delay: 0.6 }}
             className="h-0.5 bg-pub-gold mx-auto mb-6"
           />
@@ -163,8 +181,12 @@ export default function HomePage() {
             transition={{ duration: 0.6, delay: 1 }}
             className="flex flex-col sm:flex-row gap-4 justify-center"
           >
-            <Link to="/menu" className="btn-primary">View Our Menu</Link>
-            <Link to="/promotions" className="btn-outline">View Specials</Link>
+            <Link to="/menu" className="btn-primary">
+              View Our Menu
+            </Link>
+            <Link to="/promotions" className="btn-outline">
+              View Specials
+            </Link>
           </motion.div>
         </div>
 
@@ -183,7 +205,11 @@ export default function HomePage() {
       {promotions.length > 0 && (
         <section className="py-20 bg-transparent">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <SectionHeader subtitle="Limited Time" title="Today's Specials" description="Take advantage of our exclusive deals" />
+            <SectionHeader
+              subtitle="Limited Time"
+              title="Today's Specials"
+              description="Take advantage of our exclusive deals"
+            />
             <motion.div
               variants={stagger}
               initial="hidden"
@@ -192,22 +218,30 @@ export default function HomePage() {
               className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6"
             >
               {promotions.map((promo) => (
-                <motion.div key={promo.id} variants={fadeUp} whileHover={{ y: -6 }}>
+                <motion.div
+                  key={promo.id}
+                  variants={fadeUp}
+                  whileHover={{ y: -6 }}
+                >
                   <Link to="/promotions" className="block group">
                     <div className="rounded-xl overflow-hidden shadow-md hover:shadow-xl transition-shadow duration-300 aspect-[3/4]">
                       <img
-                        src={resolveImageUrl(promo.imageUrl) || 'https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=600&h=800&fit=crop'}
+                        src={resolveImageUrl(promo.imageUrl) || FALLBACK_IMAGE}
                         alt={promo.title}
                         className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                       />
                     </div>
-                    <p className="text-center text-pub-text font-semibold mt-2 group-hover:text-pub-gold transition-colors">{promo.title}</p>
+                    <p className="text-center text-pub-text font-semibold mt-2 group-hover:text-pub-gold transition-colors">
+                      {promo.title}
+                    </p>
                   </Link>
                 </motion.div>
               ))}
             </motion.div>
             <div className="text-center mt-8">
-              <Link to="/promotions" className="btn-outline">View All Specials</Link>
+              <Link to="/promotions" className="btn-outline">
+                View All Specials
+              </Link>
             </div>
           </div>
         </section>
@@ -216,9 +250,15 @@ export default function HomePage() {
       {/* POPULAR MENU */}
       <section className="py-20 bg-white/50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <SectionHeader subtitle="Our Favourites" title="Popular Menu Items" description="Crowd-pleasing dishes that keep our guests coming back" />
+          <SectionHeader
+            subtitle="Our Favourites"
+            title="Popular Menu Items"
+            description="Crowd-pleasing dishes that keep our guests coming back"
+          />
           {loadingMenu ? (
-            <div className="text-center text-stone-400 py-10">Loading menu...</div>
+            <div className="text-center text-stone-400 py-10">
+              Loading menu...
+            </div>
           ) : (
             <motion.div
               variants={stagger}
@@ -235,7 +275,9 @@ export default function HomePage() {
             </motion.div>
           )}
           <div className="text-center mt-10">
-            <Link to="/menu" className="btn-outline">View Full Menu</Link>
+            <Link to="/menu" className="btn-outline">
+              View Full Menu
+            </Link>
           </div>
         </div>
       </section>
@@ -244,29 +286,41 @@ export default function HomePage() {
       <section className="py-20 bg-transparent">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
-            <motion.div initial={{ opacity: 0, x: -40 }} whileInView={{ opacity: 1, x: 0 }} viewport={{ once: true }} transition={{ duration: 0.7 }}>
+            <motion.div
+              initial={{ opacity: 0, x: -40 }}
+              whileInView={{ opacity: 1, x: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.7 }}
+            >
               <p className="section-subtitle">Our Story</p>
               <h2 className="section-title">A True Norwood Landmark</h2>
               <div className="gold-divider ml-0"></div>
               <p className="text-stone-600 text-lg leading-relaxed mb-6">
-                Jack's Norwood has been the heart of the community since the day we opened our doors.
-                We believe in good food, honest drinks, and a warm welcome for everyone who walks through our door.
+                Jack's Norwood has been the heart of the community since the day
+                we opened our doors. We believe in good food, honest drinks, and
+                a warm welcome for everyone who walks through our door.
               </p>
               <p className="text-stone-500 leading-relaxed mb-8">
-                Whether you're stopping in for a cold one after work, celebrating a special occasion, or
-                bringing the family for Sunday lunch — Jack's is your home away from home.
+                Whether you're stopping in for a cold one after work,
+                celebrating a special occasion, or bringing the family for
+                Sunday lunch — Jack's is your home away from home.
               </p>
-              <Link to="/about" className="btn-outline">Our Story</Link>
+              <Link to="/about" className="btn-outline">
+                Our Story
+              </Link>
             </motion.div>
             <motion.div
-              initial={{ opacity: 0, x: 40 }} whileInView={{ opacity: 1, x: 0 }} viewport={{ once: true }} transition={{ duration: 0.7 }}
+              initial={{ opacity: 0, x: 40 }}
+              whileInView={{ opacity: 1, x: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.7 }}
               className="grid grid-cols-2 gap-4"
             >
               {[
-                { src: 'https://images.unsplash.com/photo-1537047902294-62a40c20a6ae?w=400&h=300&fit=crop', alt: 'Bar', cls: '' },
-                { src: 'https://images.unsplash.com/photo-1414235077428-338989a2e8c0?w=400&h=300&fit=crop', alt: 'Food', cls: 'mt-6' },
-                { src: 'https://images.unsplash.com/photo-1514362545857-3bc16c4c7d1b?w=400&h=300&fit=crop', alt: 'Drinks', cls: '-mt-6' },
-                { src: 'https://images.unsplash.com/photo-1516450360452-9312f5e86fc7?w=400&h=300&fit=crop', alt: 'Atmosphere', cls: '' },
+                { src: FALLBACK_IMAGE, alt: "Bar", cls: "" },
+                { src: FALLBACK_IMAGE, alt: "Food", cls: "mt-6" },
+                { src: FALLBACK_IMAGE, alt: "Drinks", cls: "-mt-6" },
+                { src: FALLBACK_IMAGE, alt: "Atmosphere", cls: "" },
               ].map(({ src, alt, cls }) => (
                 <motion.img
                   key={alt}
@@ -278,36 +332,6 @@ export default function HomePage() {
               ))}
             </motion.div>
           </div>
-        </div>
-      </section>
-
-      {/* REVIEWS */}
-      <section className="py-20 bg-white/50">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <SectionHeader subtitle="What People Say" title="Customer Reviews" />
-          <motion.div
-            variants={stagger}
-            initial="hidden"
-            whileInView="visible"
-            viewport={{ once: true }}
-            className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6"
-          >
-            {reviews.map((review, i) => (
-              <motion.div key={i} variants={fadeUp}
-                whileHover={{ y: -6, boxShadow: '0 8px 30px rgba(0,0,0,0.10)' }}
-                className="bg-white border border-stone-200 rounded-xl p-6 hover:border-pub-gold/30 transition-all duration-300">
-                <FaQuoteLeft className="text-pub-gold/30 text-3xl mb-4" />
-                <p className="text-stone-600 text-sm leading-relaxed mb-4">"{review.text}"</p>
-                <div className="flex items-center gap-1 mb-2">
-                  {[...Array(review.rating)].map((_, j) => (
-                    <FaStar key={j} className="text-pub-gold" size={12} />
-                  ))}
-                </div>
-                <p className="text-pub-gold text-sm font-semibold">{review.name}</p>
-                <p className="text-stone-400 text-xs">{review.date}</p>
-              </motion.div>
-            ))}
-          </motion.div>
         </div>
       </section>
 
@@ -332,7 +356,7 @@ export default function HomePage() {
                 />
               ) : (
                 <a
-                  href={`https://maps.google.com/?q=${encodeURIComponent(import.meta.env.VITE_RESTAURANT_ADDRESS || '123 The Parade, Norwood SA 5067')}`}
+                  href={`https://maps.google.com/?q=${encodeURIComponent(RESTAURANT_ADDRESS)}`}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="flex items-center justify-center gap-3 w-full h-full bg-stone-50 text-stone-400 hover:text-pub-gold transition-colors text-sm"
@@ -349,7 +373,7 @@ export default function HomePage() {
                 </div>
                 <div>
                   <h4 className="text-pub-text font-semibold mb-1">Address</h4>
-                  <p className="text-stone-500">123 The Parade, Norwood SA 5067, Australia</p>
+                  <p className="text-stone-500">{RESTAURANT_ADDRESS}</p>
                 </div>
               </div>
               <div className="flex items-start gap-4">
@@ -358,7 +382,12 @@ export default function HomePage() {
                 </div>
                 <div>
                   <h4 className="text-pub-text font-semibold mb-1">Phone</h4>
-                  <a href="tel:+61882345678" className="text-stone-500 hover:text-pub-gold transition-colors">(08) 8234 5678</a>
+                  <a
+                    href={`tel:${RESTAURANT_PHONE.replace(/[^+\d]/g, "")}`}
+                    className="text-stone-500 hover:text-pub-gold transition-colors"
+                  >
+                    {RESTAURANT_PHONE}
+                  </a>
                 </div>
               </div>
               <div className="flex items-start gap-4">
@@ -366,16 +395,16 @@ export default function HomePage() {
                   <FaClock className="text-pub-gold" />
                 </div>
                 <div>
-                  <h4 className="text-pub-text font-semibold mb-3">Opening Hours</h4>
+                  <h4 className="text-pub-text font-semibold mb-3">
+                    Opening Hours
+                  </h4>
                   <div className="space-y-2 text-sm">
-                    {[
-                      ['Monday – Thursday', '11:00 AM – 10:00 PM'],
-                      ['Friday – Saturday', '11:00 AM – 12:00 AM'],
-                      ['Sunday', '12:00 PM – 9:00 PM'],
-                    ].map(([day, time]) => (
+                    {OPENING_HOURS.map(({ day, time }) => (
                       <div key={day} className="flex justify-between gap-8">
                         <span className="text-stone-500">{day}</span>
-                        <span className="text-pub-gold font-medium">{time}</span>
+                        <span className="text-pub-gold font-medium">
+                          {time}
+                        </span>
                       </div>
                     ))}
                   </div>

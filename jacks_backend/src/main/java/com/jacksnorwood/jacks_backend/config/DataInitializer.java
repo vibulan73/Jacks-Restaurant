@@ -6,7 +6,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.annotation.Profile;
-import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -16,11 +16,11 @@ import java.time.LocalTime;
 
 @Component
 @Profile("dev")
+@Order(2)
 @RequiredArgsConstructor
 @Slf4j
 public class DataInitializer implements CommandLineRunner {
 
-    private final UserRepository userRepository;
     private final MenuCategoryRepository menuCategoryRepository;
     private final MenuSubcategoryRepository menuSubcategoryRepository;
     private final MenuItemRepository menuItemRepository;
@@ -28,25 +28,15 @@ public class DataInitializer implements CommandLineRunner {
     private final EventRepository eventRepository;
     private final GalleryRepository galleryRepository;
     private final SiteSettingsRepository siteSettingsRepository;
-    private final PasswordEncoder passwordEncoder;
 
     @Override
     @Transactional
     public void run(String... args) {
-        seedAdmin();
         seedMenu();         // always checks subcategories; reseeds if missing
         seedPromotions();
         seedEvents();
         seedGallery();
         seedSettings();
-    }
-
-    // ── Admin ─────────────────────────────────────────────────────────────────
-    private void seedAdmin() {
-        if (userRepository.count() > 0) return;
-        userRepository.save(User.builder()
-                .username("admin").password(passwordEncoder.encode("admin123")).role(Role.ADMIN).build());
-        log.info("Admin created: admin / admin123");
     }
 
     // ── Menu ──────────────────────────────────────────────────────────────────

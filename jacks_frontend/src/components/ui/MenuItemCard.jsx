@@ -1,7 +1,8 @@
 import { motion } from 'framer-motion';
 import { FaFire, FaLeaf } from 'react-icons/fa';
+import { FALLBACK_IMAGE } from "../../config/constants";
 
-const FALLBACK = 'https://images.unsplash.com/photo-1414235077428-338989a2e8c0?w=400&h=300&fit=crop';
+const FALLBACK = FALLBACK_IMAGE;
 
 export default function MenuItemCard({ item }) {
   return (

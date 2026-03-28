@@ -4,9 +4,10 @@ import { motion } from 'framer-motion';
 import { FaFire, FaLeaf } from 'react-icons/fa';
 import { menuAPI, resolveImageUrl } from '../../services/api';
 import LoadingSpinner from '../../components/ui/LoadingSpinner';
+import { FALLBACK_IMAGE } from "../../config/constants";
 
-const FALLBACK = 'https://images.unsplash.com/photo-1414235077428-338989a2e8c0?w=400&h=300&fit=crop';
-const FALLBACK_BANNER = 'https://images.unsplash.com/photo-1414235077428-338989a2e8c0?w=1200&h=400&fit=crop';
+const FALLBACK = FALLBACK_IMAGE;
+const FALLBACK_BANNER = FALLBACK_IMAGE;
 
 
 function toSlug(name = '') {

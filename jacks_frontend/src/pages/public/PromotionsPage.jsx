@@ -5,16 +5,17 @@ import { FaCalendarAlt, FaSun, FaStar } from 'react-icons/fa';
 import { promotionAPI, resolveImageUrl } from '../../services/api';
 import SectionHeader from '../../components/ui/SectionHeader';
 import LoadingSpinner from '../../components/ui/LoadingSpinner';
+import { FALLBACK_IMAGE } from "../../config/constants";
 
-const FALLBACK = 'https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=800&h=400&fit=crop';
+const FALLBACK = FALLBACK_IMAGE;
 
 const TABS = [
-  { key: 'DAILY',   label: 'Daily Specials',    icon: FaSun },
-  { key: 'SPECIAL', label: 'Featured Specials',  icon: FaStar },
+  { key: "DAILY", label: "Daily Specials", icon: FaSun },
+  { key: "SPECIAL", label: "Featured Specials", icon: FaStar },
 ];
 
 function PromoCard({ promo, index }) {
-  const isDaily = promo.promotionType === 'DAILY';
+  const isDaily = promo.promotionType === "DAILY";
 
   return (
     <motion.div
@@ -29,25 +30,41 @@ function PromoCard({ promo, index }) {
           src={resolveImageUrl(promo.imageUrl) || FALLBACK}
           alt={promo.title}
           className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-          onError={e => { e.target.src = FALLBACK; }}
+          onError={(e) => {
+            e.target.src = FALLBACK;
+          }}
         />
-        <div className={`absolute top-4 left-4 text-xs font-bold px-2.5 py-1 rounded-full flex items-center gap-1.5 ${
-          isDaily ? 'bg-blue-500/90 text-white' : 'bg-purple-500/90 text-white'
-        }`}>
+        <div
+          className={`absolute top-4 left-4 text-xs font-bold px-2.5 py-1 rounded-full flex items-center gap-1.5 ${
+            isDaily
+              ? "bg-blue-500/90 text-white"
+              : "bg-purple-500/90 text-white"
+          }`}
+        >
           {isDaily ? <FaSun size={10} /> : <FaStar size={10} />}
-          {isDaily ? (promo.dayOfWeek || 'Daily') : 'Special'}
+          {isDaily ? promo.dayOfWeek || "Daily" : "Special"}
         </div>
       </div>
 
       <div className="p-5 flex flex-col flex-1">
-        <h3 className="font-display text-pub-text text-xl font-bold mb-2">{promo.title}</h3>
+        <h3 className="font-display text-pub-text text-xl font-bold mb-2">
+          {promo.title}
+        </h3>
         {promo.description && (
-          <p className="text-stone-500 text-sm leading-relaxed flex-1">{promo.description}</p>
+          <p className="text-stone-500 text-sm leading-relaxed flex-1">
+            {promo.description}
+          </p>
         )}
         {!isDaily && promo.endDateTime && (
           <div className="flex items-center gap-2 text-stone-400 text-xs mt-3">
             <FaCalendarAlt className="text-pub-gold" />
-            <span>Valid until {new Date(promo.endDateTime).toLocaleString('en-AU', { dateStyle: 'medium', timeStyle: 'short' })}</span>
+            <span>
+              Valid until{" "}
+              {new Date(promo.endDateTime).toLocaleString("en-AU", {
+                dateStyle: "medium",
+                timeStyle: "short",
+              })}
+            </span>
           </div>
         )}
       </div>
@@ -59,32 +76,41 @@ export default function PromotionsPage() {
   const [promotions, setPromotions] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchParams] = useSearchParams();
-  const typeParam = searchParams.get('type');
+  const typeParam = searchParams.get("type");
   const [activeTab, setActiveTab] = useState(
-    typeParam && ['DAILY','SPECIAL'].includes(typeParam) ? typeParam : 'DAILY'
+    typeParam && ["DAILY", "SPECIAL"].includes(typeParam) ? typeParam : "DAILY",
   );
 
   useEffect(() => {
-    if (typeParam && ['DAILY','SPECIAL'].includes(typeParam)) setActiveTab(typeParam);
-    else if (!typeParam) setActiveTab('DAILY');
+    if (typeParam && ["DAILY", "SPECIAL"].includes(typeParam))
+      setActiveTab(typeParam);
+    else if (!typeParam) setActiveTab("DAILY");
   }, [typeParam]);
 
   useEffect(() => {
-    promotionAPI.getActive()
-      .then(r => setPromotions(r.data))
+    promotionAPI
+      .getActive()
+      .then((r) => setPromotions(r.data))
       .catch(console.error)
       .finally(() => setLoading(false));
   }, []);
 
-  const filtered = promotions.filter(p => p.promotionType === activeTab);
+  const filtered = promotions.filter((p) => p.promotionType === activeTab);
 
   return (
     <div className="min-h-screen pt-20">
-      <div className="relative py-24 bg-cover bg-center"
-        style={{ backgroundImage: "url('https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=1920&q=80')" }}>
+      <div
+        className="relative py-24 bg-cover bg-center"
+        style={{ backgroundImage: `url('${FALLBACK_IMAGE}')` }}
+      >
         <div className="absolute inset-0 bg-gradient-to-b from-black/55 via-black/35 to-pub-light/90" />
         <div className="relative z-10 text-center">
-          <SectionHeader subtitle="Deals & Offers" title="Our Specials" description="Take advantage of our exclusive offers" light={true} />
+          <SectionHeader
+            subtitle="Deals & Offers"
+            title="Our Specials"
+            description="Take advantage of our exclusive offers"
+            light={true}
+          />
         </div>
       </div>
 
@@ -97,8 +123,8 @@ export default function PromotionsPage() {
               onClick={() => setActiveTab(key)}
               className={`flex items-center gap-2 px-6 py-2.5 rounded-full text-sm font-semibold uppercase tracking-wider transition-all duration-200 ${
                 activeTab === key
-                  ? 'bg-pub-gold text-white'
-                  : 'bg-white text-stone-600 hover:bg-pub-gold/10 border border-stone-200'
+                  ? "bg-pub-gold text-white"
+                  : "bg-white text-stone-600 hover:bg-pub-gold/10 border border-stone-200"
               }`}
             >
               <Icon size={14} />
@@ -111,7 +137,11 @@ export default function PromotionsPage() {
           <LoadingSpinner />
         ) : filtered.length === 0 ? (
           <div className="text-center text-stone-400 py-20">
-            <p className="text-xl">No {activeTab === 'DAILY' ? 'daily specials' : 'featured specials'} at the moment</p>
+            <p className="text-xl">
+              No{" "}
+              {activeTab === "DAILY" ? "daily specials" : "featured specials"}{" "}
+              at the moment
+            </p>
             <p className="text-sm mt-2">Check back soon!</p>
           </div>
         ) : (
