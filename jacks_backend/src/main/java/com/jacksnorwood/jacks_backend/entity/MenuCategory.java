@@ -18,6 +18,7 @@ public class MenuCategory {
     @Column(nullable = false)
     private String name;
 
+    @Column(length = 1000)
     private String description;
 
     private String imageUrl;
