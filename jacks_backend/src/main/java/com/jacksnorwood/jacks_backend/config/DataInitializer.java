@@ -11,8 +11,6 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
-import java.time.LocalDate;
-import java.time.LocalTime;
 
 @Component
 @Order(2)
@@ -23,19 +21,11 @@ public class DataInitializer implements CommandLineRunner {
     private final MenuCategoryRepository menuCategoryRepository;
     private final MenuSubcategoryRepository menuSubcategoryRepository;
     private final MenuItemRepository menuItemRepository;
-    private final PromotionRepository promotionRepository;
-    private final EventRepository eventRepository;
-    private final GalleryRepository galleryRepository;
-    private final SiteSettingsRepository siteSettingsRepository;
 
     @Override
     @Transactional
     public void run(String... args) {
         seedMenu();
-        seedPromotions();
-        seedEvents();
-        seedGallery();
-        seedSettings();
     }
 
     // ── Menu ──────────────────────────────────────────────────────────────────
@@ -302,76 +292,6 @@ public class DataInitializer implements CommandLineRunner {
 
         log.info("Menu seeding complete — {} categories, {} subcategories, {} items.",
                 menuCategoryRepository.count(), menuSubcategoryRepository.count(), menuItemRepository.count());
-    }
-
-    // ── Promotions ────────────────────────────────────────────────────────────
-    private void seedPromotions() {
-        if (promotionRepository.count() > 0) return;
-        log.info("Seeding promotions...");
-        promotionRepository.save(Promotion.builder().title("Happy Hour")
-                .description("50% off all drinks every day 4–6 PM! Grab a cold one before the rush.")
-                .active(true).promotionType(PromotionType.DAILY).build());
-        promotionRepository.save(Promotion.builder().title("Lunch Special")
-                .description("Any main meal + soft drink for a great value price, available Mon–Fri 11 AM – 3 PM.")
-                .active(true).promotionType(PromotionType.DAILY).build());
-        promotionRepository.save(Promotion.builder().title("Steak Night Thursday")
-                .description("Every Thursday — 250g scotch fillet, chips, salad & a glass of house red or white.")
-                .active(true).promotionType(PromotionType.DAILY).build());
-        promotionRepository.save(Promotion.builder().title("Weekend Brunch Special")
-                .description("Free dessert with every main meal on Saturday and Sunday. Treat yourself!")
-                .active(true).promotionType(PromotionType.SPECIAL).build());
-        promotionRepository.save(Promotion.builder().title("Family Feast")
-                .description("Feed the whole family! 2 mains, 2 kids meals and a shared dessert for a special price.")
-                .active(true).promotionType(PromotionType.SPECIAL).build());
-        promotionRepository.save(Promotion.builder().title("Wings Wednesday")
-                .description("1kg buffalo wings + a pint of beer every Wednesday. The perfect midweek treat.")
-                .active(true).promotionType(PromotionType.DAILY).build());
-    }
-
-    // ── Events ────────────────────────────────────────────────────────────────
-    private void seedEvents() {
-        if (eventRepository.count() > 0) return;
-        log.info("Seeding events...");
-        eventRepository.save(Event.builder().title("Live Music Friday")
-                .description("Enjoy live acoustic music every Friday night with our resident local band. No cover charge!")
-                .date(LocalDate.now().plusDays(5)).time(LocalTime.of(20, 0)).active(true).build());
-        eventRepository.save(Event.builder().title("NRL Finals Watch Party")
-                .description("Watch the NRL Finals on our giant screens. $5 beers all night long!")
-                .date(LocalDate.now().plusDays(12)).time(LocalTime.of(18, 0)).active(true).build());
-        eventRepository.save(Event.builder().title("Thursday Trivia Night")
-                .description("Test your knowledge every Thursday! Prizes for the top 3 teams. Teams of up to 6.")
-                .date(LocalDate.now().plusDays(4)).time(LocalTime.of(19, 0)).active(true).build());
-        eventRepository.save(Event.builder().title("Saturday DJ Night")
-                .description("Dance the night away with our resident DJ spinning the best hits all night.")
-                .date(LocalDate.now().plusDays(8)).time(LocalTime.of(21, 0)).active(true).build());
-    }
-
-    // ── Gallery ───────────────────────────────────────────────────────────────
-    private void seedGallery() {
-        if (galleryRepository.count() > 0) return;
-        log.info("Seeding gallery...");
-        String[][] food = {
-            {"https://images.unsplash.com/photo-1414235077428-338989a2e8c0?w=800", "Signature Burger"},
-            {"https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=800",    "Fresh Salad"},
-            {"https://images.unsplash.com/photo-1555939594-58d7cb561ad1?w=800",    "Grilled Salmon"},
-            {"https://images.unsplash.com/photo-1551782450-a2132b4ba21d?w=800",    "BBQ Wings"},
-        };
-        for (int i = 0; i < food.length; i++)
-            galleryRepository.save(Gallery.builder().imageUrl(food[i][0]).category("food").caption(food[i][1]).displayOrder(i + 1).build());
-        galleryRepository.save(Gallery.builder().imageUrl("https://images.unsplash.com/photo-1514362545857-3bc16c4c7d1b?w=800").category("drinks").caption("Craft Cocktails").displayOrder(5).build());
-        galleryRepository.save(Gallery.builder().imageUrl("https://images.unsplash.com/photo-1571091718767-18b5b1457add?w=800").category("drinks").caption("Cold Beers on Tap").displayOrder(6).build());
-        galleryRepository.save(Gallery.builder().imageUrl("https://images.unsplash.com/photo-1516450360452-9312f5e86fc7?w=800").category("events").caption("Live Music Night").displayOrder(7).build());
-        galleryRepository.save(Gallery.builder().imageUrl("https://images.unsplash.com/photo-1470229538611-16ba8c7ffbd7?w=800").category("events").caption("Pub Night").displayOrder(8).build());
-        galleryRepository.save(Gallery.builder().imageUrl("https://images.unsplash.com/photo-1537047902294-62a40c20a6ae?w=800").category("interior").caption("Bar Area").displayOrder(9).build());
-        galleryRepository.save(Gallery.builder().imageUrl("https://images.unsplash.com/photo-1590846406792-0adc7f938f1d?w=800").category("interior").caption("Dining Room").displayOrder(10).build());
-    }
-
-    // ── Site settings ─────────────────────────────────────────────────────────
-    private void seedSettings() {
-        if (siteSettingsRepository.count() > 0) return;
-        siteSettingsRepository.save(new SiteSettings("social.facebook",  ""));
-        siteSettingsRepository.save(new SiteSettings("social.instagram", ""));
-        siteSettingsRepository.save(new SiteSettings("social.tiktok",    ""));
     }
 
     // ── Helpers ───────────────────────────────────────────────────────────────
