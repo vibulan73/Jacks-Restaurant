@@ -15,7 +15,6 @@ import java.time.LocalDate;
 import java.time.LocalTime;
 
 @Component
-@Profile("dev")
 @Order(2)
 @RequiredArgsConstructor
 @Slf4j
