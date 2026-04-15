@@ -1,12 +1,24 @@
-import { useRef, useState } from 'react';
-import { useForm } from 'react-hook-form';
-import { motion } from 'framer-motion';
-import toast from 'react-hot-toast';
-import { FaMapMarkerAlt, FaPhone, FaEnvelope, FaClock, FaUpload, FaCheckCircle } from 'react-icons/fa';
-import { contactAPI, uploadAPI } from '../../services/api';
-import SectionHeader from '../../components/ui/SectionHeader';
+import { useRef, useState, useEffect } from "react";
+import { useForm } from "react-hook-form";
+import { motion } from "framer-motion";
+import toast from "react-hot-toast";
 import {
-  FALLBACK_IMAGE,
+  FaMapMarkerAlt,
+  FaPhone,
+  FaEnvelope,
+  FaClock,
+  FaUpload,
+  FaCheckCircle,
+} from "react-icons/fa";
+import {
+  contactAPI,
+  uploadAPI,
+  heroImageAPI,
+  resolveImageUrl,
+} from "../../services/api";
+import SectionHeader from "../../components/ui/SectionHeader";
+import {
+  FALLBACK_HERO,
   RESTAURANT_ADDRESS,
   RESTAURANT_PHONE,
   RESTAURANT_EMAIL,
@@ -26,6 +38,14 @@ export default function ContactPage() {
   const [cvFile, setCvFile] = useState(null);
   const [cvUploading, setCvUploading] = useState(false);
   const [cvUrl, setCvUrl] = useState("");
+  const [heroImages, setHeroImages] = useState([]);
+
+  useEffect(() => {
+    heroImageAPI
+      .getActive()
+      .then((r) => setHeroImages(r.data))
+      .catch(() => {});
+  }, []);
   const fileRef = useRef(null);
 
   const subject = watch("subject", "General");
@@ -67,7 +87,9 @@ export default function ContactPage() {
     <div className="min-h-screen pt-20">
       <div
         className="relative py-24 bg-cover bg-center"
-        style={{ backgroundImage: `url('${FALLBACK_IMAGE}')` }}
+        style={{
+          backgroundImage: `url('${heroImages[0]?.imageUrl ? resolveImageUrl(heroImages[0].imageUrl) : FALLBACK_HERO}')`,
+        }}
       >
         <div className="absolute inset-0 bg-gradient-to-b from-black/55 via-black/35 to-pub-light/90" />
         <div className="relative z-10 text-center">

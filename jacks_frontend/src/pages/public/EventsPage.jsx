@@ -2,12 +2,12 @@ import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { FaCalendarAlt, FaClock, FaTicketAlt } from 'react-icons/fa';
-import { eventAPI } from '../../services/api';
-import SectionHeader from '../../components/ui/SectionHeader';
-import LoadingSpinner from '../../components/ui/LoadingSpinner';
-import { FALLBACK_IMAGE } from "../../config/constants";
+import { eventAPI, resolveImageUrl } from "../../services/api";
+import SectionHeader from "../../components/ui/SectionHeader";
+import LoadingSpinner from "../../components/ui/LoadingSpinner";
+import { FALLBACK_EVENT, FALLBACK_HERO } from "../../config/constants";
 
-const FALLBACK = FALLBACK_IMAGE;
+const FALLBACK = FALLBACK_EVENT;
 
 export default function EventsPage() {
   const [events, setEvents] = useState([]);
@@ -36,7 +36,9 @@ export default function EventsPage() {
     <div className="min-h-screen pt-20">
       <div
         className="relative py-24 bg-cover bg-center"
-        style={{ backgroundImage: `url('${FALLBACK_IMAGE}')` }}
+        style={{
+          backgroundImage: `url('${events[0]?.imageUrl ? resolveImageUrl(events[0].imageUrl) : FALLBACK_HERO}')`,
+        }}
       >
         <div className="absolute inset-0 bg-gradient-to-b from-black/55 via-black/35 to-pub-light/90" />
         <div className="relative z-10 text-center">
@@ -72,7 +74,7 @@ export default function EventsPage() {
               >
                 <div className="md:w-80 h-56 md:h-auto flex-shrink-0 overflow-hidden">
                   <img
-                    src={event.imageUrl || FALLBACK}
+                    src={resolveImageUrl(event.imageUrl, FALLBACK)}
                     alt={event.title}
                     className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                     onError={(e) => {

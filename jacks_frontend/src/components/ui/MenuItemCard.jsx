@@ -1,5 +1,6 @@
 import { motion } from 'framer-motion';
 import { FaFire, FaLeaf } from 'react-icons/fa';
+import { resolveImageUrl } from "../../services/api";
 import { FALLBACK_IMAGE } from "../../config/constants";
 
 const FALLBACK = FALLBACK_IMAGE;
@@ -12,11 +13,13 @@ export default function MenuItemCard({ item }) {
     >
       <div className="relative h-52 overflow-hidden">
         <img
-          src={item.imageUrl || FALLBACK}
+          src={resolveImageUrl(item.imageUrl, FALLBACK)}
           alt={item.name}
           className="w-full h-full object-cover transition-transform duration-500 hover:scale-110"
           loading="lazy"
-          onError={(e) => { e.target.src = FALLBACK; }}
+          onError={(e) => {
+            e.target.src = FALLBACK;
+          }}
         />
         <div className="absolute inset-0 bg-gradient-to-t from-pub-dark/60 to-transparent" />
         <div className="absolute top-3 right-3 flex gap-1">
@@ -34,15 +37,21 @@ export default function MenuItemCard({ item }) {
       </div>
       <div className="p-4 flex flex-col flex-1">
         <div className="flex justify-between items-start mb-2">
-          <h3 className="font-display text-pub-text font-semibold text-lg leading-tight">{item.name}</h3>
+          <h3 className="font-display text-pub-text font-semibold text-lg leading-tight">
+            {item.name}
+          </h3>
           <span className="text-pub-gold font-bold text-lg ml-2 whitespace-nowrap">
             ${parseFloat(item.price).toFixed(2)}
           </span>
         </div>
         {item.categoryName && (
-          <span className="text-pub-gold/60 text-xs uppercase tracking-wider mb-2">{item.categoryName}</span>
+          <span className="text-pub-gold/60 text-xs uppercase tracking-wider mb-2">
+            {item.categoryName}
+          </span>
         )}
-        <p className="text-stone-500 text-sm leading-relaxed flex-1">{item.description}</p>
+        <p className="text-stone-500 text-sm leading-relaxed flex-1">
+          {item.description}
+        </p>
       </div>
     </motion.div>
   );

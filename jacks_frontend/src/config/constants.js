@@ -25,7 +25,14 @@ export const OPENING_HOURS = [
 ];
 
 // ─── Fallback / Placeholder Images ─────────────────────────
-export const FALLBACK_IMAGE = "/images/placeholder-food.svg";
+// Real Unsplash photos that match the pub/restaurant theme.
+export const FALLBACK_IMAGE      = "https://images.unsplash.com/photo-1568901346375-23c9450c58cd?w=800&h=600&fit=crop&q=80";   // burger & fries
+export const FALLBACK_HERO       = "https://images.unsplash.com/photo-1514933651103-005eec06c04b?w=1200&h=500&fit=crop&q=80";  // warm bar interior
+export const FALLBACK_EVENT      = "https://images.unsplash.com/photo-1501281668745-f7f57925c3b4?w=800&h=600&fit=crop&q=80";   // live music / event
+export const FALLBACK_TEAM       = "https://images.unsplash.com/photo-1577219491135-ce391730fb2c?w=400&h=400&fit=crop&q=80";    // chef portrait
+export const FALLBACK_GALLERY    = "https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=800&h=600&fit=crop&q=80";   // restaurant interior
+export const FALLBACK_PROMOTION  = "https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=600&h=800&fit=crop&q=80";   // appetising food plating
+export const FALLBACK_RESTAURANT = "https://images.unsplash.com/photo-1466978913421-dad2ebd01d17?w=800&h=600&fit=crop&q=80";   // pub atmosphere
 
 // ─── Local Storage Keys ────────────────────────────────────
 export const LS_TOKEN_KEY = "jn_token";

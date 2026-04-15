@@ -4,7 +4,7 @@ import { FaTimes, FaChevronLeft, FaChevronRight } from 'react-icons/fa';
 import { galleryAPI, resolveImageUrl } from '../../services/api';
 import SectionHeader from '../../components/ui/SectionHeader';
 import LoadingSpinner from '../../components/ui/LoadingSpinner';
-import { FALLBACK_IMAGE } from "../../config/constants";
+import { FALLBACK_GALLERY, FALLBACK_HERO } from "../../config/constants";
 
 const CATEGORIES = ["all", "food", "drinks", "events", "interior"];
 
@@ -48,7 +48,9 @@ export default function GalleryPage() {
     <div className="min-h-screen pt-20">
       <div
         className="relative py-24 bg-cover bg-center"
-        style={{ backgroundImage: `url('${FALLBACK_IMAGE}')` }}
+        style={{
+          backgroundImage: `url('${images[0]?.imageUrl ? resolveImageUrl(images[0].imageUrl) : FALLBACK_HERO}')`,
+        }}
       >
         <div className="absolute inset-0 bg-gradient-to-b from-black/55 via-black/35 to-pub-light/90" />
         <div className="relative z-10 text-center">
@@ -98,10 +100,13 @@ export default function GalleryPage() {
                 onClick={() => openLightbox(idx)}
               >
                 <img
-                  src={resolveImageUrl(img.imageUrl)}
+                  src={resolveImageUrl(img.imageUrl, FALLBACK_GALLERY)}
                   alt={img.caption || "Gallery image"}
                   className="w-full object-cover transition-transform duration-500 group-hover:scale-110"
                   loading="lazy"
+                  onError={(e) => {
+                    e.target.src = FALLBACK_GALLERY;
+                  }}
                 />
                 <div className="absolute inset-0 bg-pub-dark/0 group-hover:bg-pub-dark/60 transition-all duration-300 flex items-center justify-center">
                   <span className="text-white opacity-0 group-hover:opacity-100 transition-opacity duration-300 text-sm font-medium">
@@ -152,10 +157,16 @@ export default function GalleryPage() {
               key={lightbox}
               initial={{ scale: 0.9, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
-              src={resolveImageUrl(filtered[lightbox]?.imageUrl)}
+              src={resolveImageUrl(
+                filtered[lightbox]?.imageUrl,
+                FALLBACK_GALLERY,
+              )}
               alt={filtered[lightbox]?.caption}
               className="max-w-5xl max-h-[85vh] object-contain rounded-lg"
               onClick={(e) => e.stopPropagation()}
+              onError={(e) => {
+                e.target.src = FALLBACK_GALLERY;
+              }}
             />
             {filtered[lightbox]?.caption && (
               <div className="absolute bottom-8 text-white/80 text-sm bg-black/50 px-4 py-2 rounded">

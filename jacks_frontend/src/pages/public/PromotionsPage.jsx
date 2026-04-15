@@ -5,9 +5,9 @@ import { FaCalendarAlt, FaSun, FaStar } from 'react-icons/fa';
 import { promotionAPI, resolveImageUrl } from '../../services/api';
 import SectionHeader from '../../components/ui/SectionHeader';
 import LoadingSpinner from '../../components/ui/LoadingSpinner';
-import { FALLBACK_IMAGE } from "../../config/constants";
+import { FALLBACK_PROMOTION, FALLBACK_HERO } from "../../config/constants";
 
-const FALLBACK = FALLBACK_IMAGE;
+const FALLBACK = FALLBACK_PROMOTION;
 
 const TABS = [
   { key: "DAILY", label: "Daily Specials", icon: FaSun },
@@ -27,7 +27,7 @@ function PromoCard({ promo, index }) {
       {/* Poster image — portrait aspect ratio */}
       <div className="relative overflow-hidden aspect-[3/4]">
         <img
-          src={resolveImageUrl(promo.imageUrl) || FALLBACK}
+          src={resolveImageUrl(promo.imageUrl, FALLBACK)}
           alt={promo.title}
           className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
           onError={(e) => {
@@ -101,7 +101,9 @@ export default function PromotionsPage() {
     <div className="min-h-screen pt-20">
       <div
         className="relative py-24 bg-cover bg-center"
-        style={{ backgroundImage: `url('${FALLBACK_IMAGE}')` }}
+        style={{
+          backgroundImage: `url('${promotions[0]?.imageUrl ? resolveImageUrl(promotions[0].imageUrl) : FALLBACK_HERO}')`,
+        }}
       >
         <div className="absolute inset-0 bg-gradient-to-b from-black/55 via-black/35 to-pub-light/90" />
         <div className="relative z-10 text-center">

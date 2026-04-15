@@ -4,9 +4,9 @@ const BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8080/api
 
 // Resolve uploaded file paths (e.g. "/uploads/file.jpg") to full backend URLs
 const BACKEND_ORIGIN = BASE_URL.replace(/\/api$/, '');
-export const resolveImageUrl = (url) => {
-  if (!url) return '';
-  if (url.startsWith('http')) return url;
+export const resolveImageUrl = (url, fallback = "") => {
+  if (!url) return fallback;
+  if (url.startsWith("http")) return url;
   return BACKEND_ORIGIN + url;
 };
 

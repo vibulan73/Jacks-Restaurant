@@ -5,7 +5,7 @@ import { promotionAPI, resolveImageUrl } from '../../services/api';
 import { HiPencil, HiTrash, HiX } from 'react-icons/hi';
 import { FaSun, FaStar } from 'react-icons/fa';
 import ImageUpload from '../../components/ui/ImageUpload';
-import { FALLBACK_IMAGE } from "../../config/constants";
+import { FALLBACK_PROMOTION } from "../../config/constants";
 
 const DAYS = [
   "Monday",
@@ -407,13 +407,13 @@ export default function AdminPromotions() {
 }
 
 function PromoCard({ p, onEdit, onDelete }) {
-  const FALLBACK_IMG = FALLBACK_IMAGE;
+  const FALLBACK_IMG = FALLBACK_PROMOTION;
   const isDaily = p.promotionType === "DAILY";
   return (
     <div className="bg-gray-900 border border-white/10 rounded-xl overflow-hidden">
       <div className="h-40 relative overflow-hidden">
         <img
-          src={resolveImageUrl(p.imageUrl) || FALLBACK_IMG}
+          src={resolveImageUrl(p.imageUrl, FALLBACK_IMG)}
           alt={p.title}
           onError={(e) => {
             e.target.src = FALLBACK_IMG;

@@ -12,6 +12,7 @@ import {
   menuAPI,
   promotionAPI,
   heroImageAPI,
+  galleryAPI,
   resolveImageUrl,
 } from "../../services/api";
 import heroImg from "../../image/IMG_0327_denoiser.jpeg";
@@ -20,6 +21,9 @@ import SectionHeader from "../../components/ui/SectionHeader";
 import SpecialsPopup from "../../components/ui/SpecialsPopup";
 import {
   FALLBACK_IMAGE,
+  FALLBACK_HERO,
+  FALLBACK_PROMOTION,
+  FALLBACK_GALLERY,
   RESTAURANT_PHONE,
   RESTAURANT_ADDRESS,
   OPENING_HOURS,
@@ -40,6 +44,7 @@ export default function HomePage() {
   const [loadingMenu, setLoadingMenu] = useState(true);
   const [heroImages, setHeroImages] = useState([]);
   const [heroIndex, setHeroIndex] = useState(0);
+  const [galleryImages, setGalleryImages] = useState([]);
   const timerRef = useRef(null);
 
   useEffect(() => {
@@ -47,6 +52,7 @@ export default function HomePage() {
       menuAPI.getPopular().then((r) => setPopularItems(r.data.slice(0, 6))),
       promotionAPI.getActive().then((r) => setPromotions(r.data.slice(0, 3))),
       heroImageAPI.getActive().then((r) => setHeroImages(r.data)),
+      galleryAPI.getAll().then((r) => setGalleryImages(r.data)),
     ])
       .catch(console.error)
       .finally(() => setLoadingMenu(false));
@@ -226,9 +232,15 @@ export default function HomePage() {
                   <Link to="/promotions" className="block group">
                     <div className="rounded-xl overflow-hidden shadow-md hover:shadow-xl transition-shadow duration-300 aspect-[3/4]">
                       <img
-                        src={resolveImageUrl(promo.imageUrl) || FALLBACK_IMAGE}
+                        src={resolveImageUrl(
+                          promo.imageUrl,
+                          FALLBACK_PROMOTION,
+                        )}
                         alt={promo.title}
                         className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                        onError={(e) => {
+                          e.target.src = FALLBACK_PROMOTION;
+                        }}
                       />
                     </div>
                     <p className="text-center text-pub-text font-semibold mt-2 group-hover:text-pub-gold transition-colors">
@@ -317,19 +329,28 @@ export default function HomePage() {
               className="grid grid-cols-2 gap-4"
             >
               {[
-                { src: FALLBACK_IMAGE, alt: "Bar", cls: "" },
-                { src: FALLBACK_IMAGE, alt: "Food", cls: "mt-6" },
-                { src: FALLBACK_IMAGE, alt: "Drinks", cls: "-mt-6" },
-                { src: FALLBACK_IMAGE, alt: "Atmosphere", cls: "" },
-              ].map(({ src, alt, cls }) => (
-                <motion.img
-                  key={alt}
-                  whileHover={{ scale: 1.04 }}
-                  src={src}
-                  alt={alt}
-                  className={`rounded-xl h-48 w-full object-cover shadow-md ${cls}`}
-                />
-              ))}
+                { alt: "Bar", cls: "" },
+                { alt: "Food", cls: "mt-6" },
+                { alt: "Drinks", cls: "-mt-6" },
+                { alt: "Atmosphere", cls: "" },
+              ].map(({ alt, cls }, i) => {
+                const img = galleryImages[i];
+                const src = img?.imageUrl
+                  ? resolveImageUrl(img.imageUrl, FALLBACK_GALLERY)
+                  : FALLBACK_GALLERY;
+                return (
+                  <motion.img
+                    key={alt}
+                    whileHover={{ scale: 1.04 }}
+                    src={src}
+                    alt={alt}
+                    className={`rounded-xl h-48 w-full object-cover shadow-md ${cls}`}
+                    onError={(e) => {
+                      e.target.src = FALLBACK_GALLERY;
+                    }}
+                  />
+                );
+              })}
             </motion.div>
           </div>
         </div>

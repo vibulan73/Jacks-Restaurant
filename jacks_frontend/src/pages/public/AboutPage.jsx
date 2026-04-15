@@ -3,10 +3,15 @@ import { motion } from 'framer-motion';
 import { FaHeart, FaUsers, FaAward, FaBeer } from 'react-icons/fa';
 import SectionHeader from '../../components/ui/SectionHeader';
 import { Link } from 'react-router-dom';
-import { teamAPI, resolveImageUrl } from '../../services/api';
-import { FALLBACK_IMAGE } from "../../config/constants";
+import { teamAPI, heroImageAPI, resolveImageUrl } from "../../services/api";
+import {
+  FALLBACK_IMAGE,
+  FALLBACK_HERO,
+  FALLBACK_TEAM,
+  FALLBACK_RESTAURANT,
+} from "../../config/constants";
 
-const FALLBACK = FALLBACK_IMAGE;
+const FALLBACK = FALLBACK_TEAM;
 
 const stats = [
   { icon: FaAward, value: "10+", label: "Years Serving Norwood" },
@@ -17,11 +22,16 @@ const stats = [
 
 export default function AboutPage() {
   const [team, setTeam] = useState([]);
+  const [heroImages, setHeroImages] = useState([]);
 
   useEffect(() => {
     teamAPI
       .getAll()
       .then((r) => setTeam(r.data))
+      .catch(() => {});
+    heroImageAPI
+      .getActive()
+      .then((r) => setHeroImages(r.data))
       .catch(() => {});
   }, []);
   return (
@@ -29,7 +39,9 @@ export default function AboutPage() {
       {/* Hero */}
       <div
         className="relative py-32 bg-cover bg-center"
-        style={{ backgroundImage: `url('${FALLBACK_IMAGE}')` }}
+        style={{
+          backgroundImage: `url('${heroImages[0]?.imageUrl ? resolveImageUrl(heroImages[0].imageUrl) : FALLBACK_HERO}')`,
+        }}
       >
         <div className="absolute inset-0 bg-gradient-to-b from-black/55 via-black/35 to-pub-light/90" />
         <div className="relative z-10 text-center">
@@ -83,9 +95,18 @@ export default function AboutPage() {
             >
               <div className="relative">
                 <img
-                  src={FALLBACK_IMAGE}
+                  src={
+                    heroImages[1]?.imageUrl
+                      ? resolveImageUrl(heroImages[1].imageUrl)
+                      : heroImages[0]?.imageUrl
+                        ? resolveImageUrl(heroImages[0].imageUrl)
+                        : FALLBACK_RESTAURANT
+                  }
                   alt="Restaurant interior"
                   className="rounded-xl w-full object-cover h-96 shadow-md"
+                  onError={(e) => {
+                    e.target.src = FALLBACK_RESTAURANT;
+                  }}
                 />
                 <div className="absolute -bottom-6 -right-6 bg-pub-gold text-white p-6 rounded-xl font-display shadow-lg">
                   <p className="text-3xl font-bold">10+</p>
@@ -182,7 +203,7 @@ export default function AboutPage() {
                 >
                   <div className="relative w-36 h-36 mx-auto mb-4 overflow-hidden rounded-full border-2 border-pub-gold/30 group-hover:border-pub-gold transition-all duration-300 shadow-sm">
                     <img
-                      src={resolveImageUrl(member.imageUrl) || FALLBACK}
+                      src={resolveImageUrl(member.imageUrl, FALLBACK)}
                       alt={member.name}
                       className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
                       onError={(e) => {

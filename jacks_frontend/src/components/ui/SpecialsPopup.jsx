@@ -2,10 +2,10 @@ import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { FaTimes } from 'react-icons/fa';
-import { promotionAPI } from '../../services/api';
-import { FALLBACK_IMAGE } from "../../config/constants";
+import { promotionAPI, resolveImageUrl } from "../../services/api";
+import { FALLBACK_PROMOTION } from "../../config/constants";
 
-const FALLBACK = FALLBACK_IMAGE;
+const FALLBACK = FALLBACK_PROMOTION;
 
 export default function SpecialsPopup() {
   const [visible, setVisible] = useState(false);
@@ -13,13 +13,20 @@ export default function SpecialsPopup() {
   const navigate = useNavigate();
 
   useEffect(() => {
-    if (sessionStorage.getItem('specials_popup_shown')) return;
+    if (sessionStorage.getItem("specials_popup_shown")) return;
 
-    promotionAPI.getActive()
-      .then(r => {
+    promotionAPI
+      .getActive()
+      .then((r) => {
         // Show only today's DAILY type promotions in the popup
-        const today = new Date().toLocaleDateString('en-US', { weekday: 'long' });
-        const daily = r.data.filter(p => p.promotionType === 'DAILY' && (!p.dayOfWeek || p.dayOfWeek === today));
+        const today = new Date().toLocaleDateString("en-US", {
+          weekday: "long",
+        });
+        const daily = r.data.filter(
+          (p) =>
+            p.promotionType === "DAILY" &&
+            (!p.dayOfWeek || p.dayOfWeek === today),
+        );
         if (daily.length > 0) {
           setDailySpecials(daily);
           setTimeout(() => setVisible(true), 800);
@@ -30,12 +37,12 @@ export default function SpecialsPopup() {
 
   const close = () => {
     setVisible(false);
-    sessionStorage.setItem('specials_popup_shown', '1');
+    sessionStorage.setItem("specials_popup_shown", "1");
   };
 
   const goToSpecials = () => {
     close();
-    navigate('/promotions?type=DAILY');
+    navigate("/promotions?type=DAILY");
   };
 
   // Single special shown at a time — use the first one, or show a poster grid
@@ -57,10 +64,10 @@ export default function SpecialsPopup() {
             initial={{ scale: 0.88, opacity: 0, y: 30 }}
             animate={{ scale: 1, opacity: 1, y: 0 }}
             exit={{ scale: 0.88, opacity: 0, y: 30 }}
-            transition={{ type: 'spring', stiffness: 260, damping: 22 }}
-            onClick={e => e.stopPropagation()}
+            transition={{ type: "spring", stiffness: 260, damping: 22 }}
+            onClick={(e) => e.stopPropagation()}
             className="relative bg-white rounded-2xl shadow-2xl w-full max-w-sm overflow-hidden flex flex-col"
-            style={{ maxHeight: '90vh' }}
+            style={{ maxHeight: "90vh" }}
           >
             {/* Close button */}
             <button
@@ -73,22 +80,28 @@ export default function SpecialsPopup() {
             {/* Poster image */}
             <div
               className="cursor-pointer overflow-hidden flex-shrink-0"
-              style={{ maxHeight: '60vh' }}
+              style={{ maxHeight: "60vh" }}
               onClick={goToSpecials}
             >
               <img
-                src={featured.imageUrl || FALLBACK}
+                src={resolveImageUrl(featured.imageUrl, FALLBACK)}
                 alt={featured.title}
                 className="w-full h-full object-cover"
-                onError={e => { e.target.src = FALLBACK; }}
+                onError={(e) => {
+                  e.target.src = FALLBACK;
+                }}
               />
             </div>
 
             {/* Footer */}
             <div className="px-6 py-5">
-              <h2 className="font-display text-pub-text text-xl font-bold mb-1">{featured.title}</h2>
+              <h2 className="font-display text-pub-text text-xl font-bold mb-1">
+                {featured.title}
+              </h2>
               {dailySpecials.length > 1 && (
-                <p className="text-stone-400 text-xs mb-4">{dailySpecials.length} daily specials available</p>
+                <p className="text-stone-400 text-xs mb-4">
+                  {dailySpecials.length} daily specials available
+                </p>
               )}
               <div className="flex gap-3">
                 <button

@@ -1,10 +1,20 @@
 import { useForm } from 'react-hook-form';
-import { motion } from 'framer-motion';
-import toast from 'react-hot-toast';
-import { FaCalendarCheck, FaUsers, FaClock, FaInfoCircle } from 'react-icons/fa';
-import { reservationAPI } from '../../services/api';
-import SectionHeader from '../../components/ui/SectionHeader';
-import { FALLBACK_IMAGE, RESTAURANT_PHONE } from "../../config/constants";
+import { useState, useEffect } from "react";
+import { motion } from "framer-motion";
+import toast from "react-hot-toast";
+import {
+  FaCalendarCheck,
+  FaUsers,
+  FaClock,
+  FaInfoCircle,
+} from "react-icons/fa";
+import {
+  reservationAPI,
+  heroImageAPI,
+  resolveImageUrl,
+} from "../../services/api";
+import SectionHeader from "../../components/ui/SectionHeader";
+import { FALLBACK_HERO, RESTAURANT_PHONE } from "../../config/constants";
 
 const TIMES = [
   "11:00",
@@ -31,6 +41,15 @@ const TIMES = [
 ];
 
 export default function ReservationPage() {
+  const [heroImages, setHeroImages] = useState([]);
+
+  useEffect(() => {
+    heroImageAPI
+      .getActive()
+      .then((r) => setHeroImages(r.data))
+      .catch(() => {});
+  }, []);
+
   const {
     register,
     handleSubmit,
@@ -57,7 +76,9 @@ export default function ReservationPage() {
     <div className="min-h-screen pt-20">
       <div
         className="relative py-24 bg-cover bg-center"
-        style={{ backgroundImage: `url('${FALLBACK_IMAGE}')` }}
+        style={{
+          backgroundImage: `url('${heroImages[0]?.imageUrl ? resolveImageUrl(heroImages[0].imageUrl) : FALLBACK_HERO}')`,
+        }}
       >
         <div className="absolute inset-0 bg-gradient-to-b from-black/55 via-black/35 to-pub-light/90" />
         <div className="relative z-10 text-center">
