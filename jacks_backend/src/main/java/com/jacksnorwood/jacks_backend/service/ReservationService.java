@@ -29,8 +29,18 @@ public class ReservationService {
     }
 
     public ReservationDTO updateStatus(Long id, String status) {
-        Reservation r = reservationRepository.findById(id).orElseThrow(() -> new RuntimeException("Not found"));
-        r.setStatus(ReservationStatus.valueOf(status.toUpperCase()));
+        if (status == null || status.isBlank()) {
+            throw new IllegalArgumentException("Status must not be blank");
+        }
+        ReservationStatus newStatus;
+        try {
+            newStatus = ReservationStatus.valueOf(status.toUpperCase());
+        } catch (IllegalArgumentException e) {
+            throw new IllegalArgumentException("Invalid status value: " + status);
+        }
+        Reservation r = reservationRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Reservation not found: " + id));
+        r.setStatus(newStatus);
         return toDTO(reservationRepository.save(r));
     }
 

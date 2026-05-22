@@ -6,4 +6,5 @@ import java.util.List;
 
 public interface HeroImageRepository extends JpaRepository<HeroImage, Long> {
     List<HeroImage> findByActiveTrueOrderByDisplayOrderAsc();
+    List<HeroImage> findAllByOrderByDisplayOrderAsc();
 }

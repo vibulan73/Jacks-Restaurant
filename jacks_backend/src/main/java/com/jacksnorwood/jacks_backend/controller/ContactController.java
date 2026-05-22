@@ -6,6 +6,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RestController
 @RequestMapping("/api/contact")
 @RequiredArgsConstructor
@@ -14,8 +16,17 @@ public class ContactController {
     private final ContactService contactService;
 
     @PostMapping
-    public ResponseEntity<Void> send(@RequestBody ContactMessageDTO dto) {
-        contactService.send(dto);
-        return ResponseEntity.ok().build();
+    public ResponseEntity<ContactMessageDTO> send(@RequestBody ContactMessageDTO dto) {
+        return ResponseEntity.ok(contactService.send(dto));
+    }
+
+    @GetMapping
+    public ResponseEntity<List<ContactMessageDTO>> getAll() {
+        return ResponseEntity.ok(contactService.getAll());
+    }
+
+    @PutMapping("/{id}/read")
+    public ResponseEntity<ContactMessageDTO> markRead(@PathVariable Long id) {
+        return ResponseEntity.ok(contactService.markRead(id));
     }
 }

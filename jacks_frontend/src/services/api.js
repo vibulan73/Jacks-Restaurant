@@ -2,6 +2,11 @@ import axios from 'axios';
 
 const BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8080/api';
 
+// AuthContext registers its logout function here so the axios interceptor can
+// trigger a proper React state reset rather than just wiping localStorage.
+let _logoutHandler = null;
+export const setLogoutHandler = (fn) => { _logoutHandler = fn; };
+
 // Resolve uploaded file paths (e.g. "/uploads/file.jpg") to full backend URLs
 const BACKEND_ORIGIN = BASE_URL.replace(/\/api$/, '');
 export const resolveImageUrl = (url, fallback = "") => {
@@ -22,13 +27,18 @@ api.interceptors.request.use((config) => {
   return config;
 });
 
-// Redirect to login on 401
+// Auto-logout on 401 (expired or invalid token)
 api.interceptors.response.use(
   (response) => response,
   (error) => {
     if (error.response?.status === 401) {
-      localStorage.removeItem('jn_token');
-      localStorage.removeItem('jn_user');
+      if (_logoutHandler) {
+        _logoutHandler();
+      } else {
+        // Fallback before AuthContext mounts (e.g. very early requests)
+        localStorage.removeItem('jn_token');
+        localStorage.removeItem('jn_user');
+      }
       if (window.location.pathname.startsWith('/admin')) {
         window.location.href = '/admin/login';
       }

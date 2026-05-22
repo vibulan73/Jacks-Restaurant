@@ -104,6 +104,7 @@ export default function GalleryPage() {
                   alt={img.caption || "Gallery image"}
                   className="w-full object-cover transition-transform duration-500 group-hover:scale-110"
                   loading="lazy"
+                  decoding="async"
                   onError={(e) => {
                     e.target.src = FALLBACK_GALLERY;
                   }}
@@ -162,6 +163,7 @@ export default function GalleryPage() {
                 FALLBACK_GALLERY,
               )}
               alt={filtered[lightbox]?.caption}
+              decoding="async"
               className="max-w-5xl max-h-[85vh] object-contain rounded-lg"
               onClick={(e) => e.stopPropagation()}
               onError={(e) => {

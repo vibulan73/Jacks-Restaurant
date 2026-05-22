@@ -3,7 +3,7 @@ import { Outlet, NavLink, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import {
   HiMenuAlt2, HiTag, HiCalendar, HiPhotograph,
-  HiClipboardList, HiLogout, HiMenu, HiChartBar, HiCog, HiNewspaper, HiUserGroup
+  HiClipboardList, HiLogout, HiMenu, HiChartBar, HiCog, HiNewspaper, HiUserGroup, HiMail
 } from 'react-icons/hi';
 import logoImg from '../../assets/images/JN L 2.png';
 
@@ -17,6 +17,7 @@ const sidebarLinks = [
   { to: '/admin/newsletter', label: 'Newsletter', icon: HiNewspaper },
   { to: '/admin/hero', label: 'Hero Images', icon: HiPhotograph },
   { to: '/admin/team', label: 'Team', icon: HiUserGroup },
+  { to: '/admin/messages', label: 'Messages', icon: HiMail },
   { to: '/admin/settings', label: 'Settings', icon: HiCog },
 ];
 

@@ -103,6 +103,8 @@ export default function AboutPage() {
                         : FALLBACK_RESTAURANT
                   }
                   alt="Restaurant interior"
+                  loading="lazy"
+                  decoding="async"
                   className="rounded-xl w-full object-cover h-96 shadow-md"
                   onError={(e) => {
                     e.target.src = FALLBACK_RESTAURANT;
@@ -205,6 +207,8 @@ export default function AboutPage() {
                     <img
                       src={resolveImageUrl(member.imageUrl, FALLBACK)}
                       alt={member.name}
+                      loading="lazy"
+                      decoding="async"
                       className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
                       onError={(e) => {
                         e.target.src = FALLBACK;

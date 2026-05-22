@@ -33,10 +33,10 @@ public class TeamMemberService {
 
     public TeamMemberDTO update(Long id, TeamMemberDTO dto) {
         TeamMember member = repo.findById(id)
-                .orElseThrow(() -> new RuntimeException("Team member not found"));
-        member.setName(dto.getName());
-        member.setPosition(dto.getPosition());
-        member.setImageUrl(dto.getImageUrl());
+                .orElseThrow(() -> new RuntimeException("Team member not found: " + id));
+        if (dto.getName() != null)        member.setName(dto.getName());
+        if (dto.getPosition() != null)    member.setPosition(dto.getPosition());
+        if (dto.getImageUrl() != null)    member.setImageUrl(dto.getImageUrl());
         if (dto.getDisplayOrder() != null) member.setDisplayOrder(dto.getDisplayOrder());
         return toDTO(repo.save(member));
     }

@@ -18,10 +18,13 @@ public class NewsletterController {
 
     /** Public: subscribe */
     @PostMapping("/subscribe")
-    public ResponseEntity<NewsletterDTO> subscribe(@RequestBody Map<String, String> body) {
+    public ResponseEntity<?> subscribe(@RequestBody Map<String, String> body) {
         String email = body.get("email");
-        String name  = body.getOrDefault("name", "");
-        return ResponseEntity.ok(newsletterService.subscribe(email, name));
+        if (email == null || email.isBlank()) {
+            return ResponseEntity.badRequest().body(Map.of("error", "Email is required"));
+        }
+        String name = body.getOrDefault("name", "");
+        return ResponseEntity.ok(newsletterService.subscribe(email.trim(), name));
     }
 
     /** Public: unsubscribe */

@@ -21,7 +21,7 @@ public class EventService {
     }
 
     public List<EventDTO> getAllEvents() {
-        return eventRepository.findAll().stream().map(this::toDTO).collect(Collectors.toList());
+        return eventRepository.findAllByOrderByDateAscIdAsc().stream().map(this::toDTO).collect(Collectors.toList());
     }
 
     public EventDTO create(EventDTO dto) {
@@ -40,14 +40,15 @@ public class EventService {
     }
 
     public EventDTO update(Long id, EventDTO dto) {
-        Event e = eventRepository.findById(id).orElseThrow(() -> new RuntimeException("Not found"));
-        if (dto.getTitle() != null) e.setTitle(dto.getTitle());
+        Event e = eventRepository.findById(id).orElseThrow(() -> new RuntimeException("Event not found: " + id));
+        if (dto.getTitle() != null)       e.setTitle(dto.getTitle());
         if (dto.getDescription() != null) e.setDescription(dto.getDescription());
-        if (dto.getImageUrl() != null) e.setImageUrl(dto.getImageUrl());
-        if (dto.getDate() != null) e.setDate(dto.getDate());
-        if (dto.getTime() != null) e.setTime(dto.getTime());
-        if (dto.getReservationLink() != null) e.setReservationLink(dto.getReservationLink());
-        if (dto.getActive() != null) e.setActive(dto.getActive());
+        if (dto.getDate() != null)        e.setDate(dto.getDate());
+        if (dto.getTime() != null)        e.setTime(dto.getTime());
+        if (dto.getActive() != null)      e.setActive(dto.getActive());
+        // Always apply these so they can be cleared by sending empty string or null
+        e.setImageUrl(dto.getImageUrl());
+        e.setReservationLink(dto.getReservationLink());
         return toDTO(eventRepository.save(e));
     }
 

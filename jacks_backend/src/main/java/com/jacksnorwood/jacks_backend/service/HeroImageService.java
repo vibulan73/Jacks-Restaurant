@@ -21,7 +21,7 @@ public class HeroImageService {
     }
 
     public List<HeroImageDTO> getAll() {
-        return repo.findAll().stream().map(this::toDTO).collect(Collectors.toList());
+        return repo.findAllByOrderByDisplayOrderAsc().stream().map(this::toDTO).collect(Collectors.toList());
     }
 
     public HeroImageDTO create(HeroImageDTO dto) {

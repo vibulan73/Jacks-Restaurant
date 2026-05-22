@@ -17,6 +17,7 @@ export default function MenuItemCard({ item }) {
           alt={item.name}
           className="w-full h-full object-cover transition-transform duration-500 hover:scale-110"
           loading="lazy"
+          decoding="async"
           onError={(e) => {
             e.target.src = FALLBACK;
           }}

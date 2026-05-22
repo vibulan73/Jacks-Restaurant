@@ -193,6 +193,7 @@ export default function MenuPage() {
                 {sec.imageUrl && (
                   <img src={resolveImageUrl(sec.imageUrl)} alt={sec.name}
                     className="w-5 h-5 rounded-full object-cover"
+                    decoding="async"
                     onError={e => { e.target.src = FALLBACK; }} />
                 )}
                 {sec.name}
@@ -241,6 +242,7 @@ export default function MenuPage() {
                           <img
                             src={resolveImageUrl(sec.imageUrl)}
                             alt={sec.name}
+                            decoding="async"
                             className="w-10 h-10 rounded-lg object-cover flex-shrink-0"
                             onError={e => { e.target.src = FALLBACK; }}
                           />
@@ -271,6 +273,8 @@ export default function MenuPage() {
                         <img
                           src={resolveImageUrl(sec.imageUrl)}
                           alt={sec.name}
+                          loading="lazy"
+                          decoding="async"
                           className="w-full h-full object-cover"
                           onError={e => { e.target.src = FALLBACK_BANNER; }}
                         />

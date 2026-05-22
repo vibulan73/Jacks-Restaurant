@@ -237,6 +237,8 @@ export default function HomePage() {
                           FALLBACK_PROMOTION,
                         )}
                         alt={promo.title}
+                        loading="lazy"
+                        decoding="async"
                         className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                         onError={(e) => {
                           e.target.src = FALLBACK_PROMOTION;
@@ -344,6 +346,8 @@ export default function HomePage() {
                     whileHover={{ scale: 1.04 }}
                     src={src}
                     alt={alt}
+                    loading="lazy"
+                    decoding="async"
                     className={`rounded-xl h-48 w-full object-cover shadow-md ${cls}`}
                     onError={(e) => {
                       e.target.src = FALLBACK_GALLERY;

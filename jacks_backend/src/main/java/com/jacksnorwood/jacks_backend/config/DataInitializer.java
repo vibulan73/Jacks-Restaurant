@@ -13,6 +13,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.math.BigDecimal;
 
 @Component
+@Profile("dev")
 @Order(2)
 @RequiredArgsConstructor
 @Slf4j

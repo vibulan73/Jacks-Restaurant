@@ -10,6 +10,7 @@ import com.jacksnorwood.jacks_backend.repository.MenuItemRepository;
 import com.jacksnorwood.jacks_backend.repository.MenuSubcategoryRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -49,7 +50,15 @@ public class MenuService {
         return toCategoryDTO(menuCategoryRepository.save(cat));
     }
 
-    public void deleteCategory(Long id) { menuCategoryRepository.deleteById(id); }
+    @Transactional
+    public void deleteCategory(Long id) {
+        // Null out subcategory→category FK to avoid orphaned rows, then delete subcategories
+        List<MenuSubcategory> subs = menuSubcategoryRepository.findByCategoryIdOrderByDisplayOrderAsc(id);
+        subs.forEach(s -> s.setCategory(null));
+        menuSubcategoryRepository.saveAll(subs);
+        menuSubcategoryRepository.deleteAll(subs);
+        menuCategoryRepository.deleteById(id);
+    }
 
     // ── Subcategories ────────────────────────────────────────────────────────────
 
@@ -89,7 +98,16 @@ public class MenuService {
         return toSubcategoryDTO(menuSubcategoryRepository.save(sub));
     }
 
-    public void deleteSubcategory(Long id) { menuSubcategoryRepository.deleteById(id); }
+    @Transactional
+    public void deleteSubcategory(Long id) {
+        // Null out the FK on any items that reference this subcategory to avoid FK violation
+        List<MenuItem> referencing = menuItemRepository.findAll().stream()
+                .filter(i -> i.getSubcategory() != null && i.getSubcategory().getId().equals(id))
+                .collect(Collectors.toList());
+        referencing.forEach(i -> i.setSubcategory(null));
+        menuItemRepository.saveAll(referencing);
+        menuSubcategoryRepository.deleteById(id);
+    }
 
     // ── Items ────────────────────────────────────────────────────────────────────
 
@@ -113,6 +131,7 @@ public class MenuService {
                 .stream().map(this::toItemDTO).collect(Collectors.toList());
     }
 
+    @Transactional
     public MenuItemDTO createItem(MenuItemDTO dto) {
         MenuCategory category = menuCategoryRepository.findById(dto.getCategoryId())
                 .orElseThrow(() -> new RuntimeException("Category not found"));
@@ -148,6 +167,7 @@ public class MenuService {
         return toItemDTO(menuItemRepository.save(item));
     }
 
+    @Transactional
     public MenuItemDTO updateItem(Long id, MenuItemDTO dto) {
         MenuItem item = menuItemRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Item not found"));

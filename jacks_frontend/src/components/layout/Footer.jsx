@@ -15,6 +15,8 @@ import {
 const quickLinks = [
   { to: "/menu", label: "Menu" },
   { to: "/promotions", label: "Specials" },
+  { to: "/events", label: "Events" },
+  { to: "/reservation", label: "Book a Table" },
   { to: "/gallery", label: "Gallery" },
   { to: "/about", label: "About Us" },
   { to: "/contact", label: "Contact" },
@@ -69,6 +71,8 @@ export default function Footer() {
             <img
               src={logoImg}
               alt="Jack's Norwood"
+              loading="lazy"
+              decoding="async"
               className="h-20 w-auto object-contain mb-4"
             />
             <p className="text-stone-500 text-sm leading-relaxed mb-6">

@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Collections;
 
 @RestController
 @RequestMapping("/api/reservations")
@@ -27,8 +28,12 @@ public class ReservationController {
     }
 
     @PutMapping("/{id}/status")
-    public ResponseEntity<ReservationDTO> updateStatus(@PathVariable Long id,
-                                                        @RequestBody Map<String, String> body) {
-        return ResponseEntity.ok(reservationService.updateStatus(id, body.get("status")));
+    public ResponseEntity<?> updateStatus(@PathVariable Long id,
+                                          @RequestBody Map<String, String> body) {
+        try {
+            return ResponseEntity.ok(reservationService.updateStatus(id, body.get("status")));
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(Collections.singletonMap("error", e.getMessage()));
+        }
     }
 }
