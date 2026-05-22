@@ -15,12 +15,10 @@ import {
   galleryAPI,
   resolveImageUrl,
 } from "../../services/api";
-import heroImg from "../../image/IMG_0327_denoiser.jpeg";
 import MenuItemCard from "../../components/ui/MenuItemCard";
 import SectionHeader from "../../components/ui/SectionHeader";
 import SpecialsPopup from "../../components/ui/SpecialsPopup";
 import {
-  FALLBACK_IMAGE,
   FALLBACK_HERO,
   FALLBACK_PROMOTION,
   FALLBACK_GALLERY,
@@ -79,7 +77,7 @@ export default function HomePage() {
   const heroBg =
     heroImages.length > 0
       ? resolveImageUrl(heroImages[heroIndex].imageUrl)
-      : import.meta.env.VITE_HERO_IMAGE_URL || heroImg;
+      : import.meta.env.VITE_HERO_IMAGE_URL || FALLBACK_HERO;
 
   return (
     <div>

@@ -1,4 +1,6 @@
-// Centralized configuration — all env-driven values in one place.
+import defaultHeroImage from "../assets/images/default-hero.jpeg";
+
+// Centralized configuration - all env-driven values in one place.
 // Fallback values are development defaults only.
 
 // ─── Restaurant Info ────────────────────────────────────────
@@ -7,6 +9,9 @@ export const RESTAURANT_NAME =
 export const RESTAURANT_PHONE = import.meta.env.VITE_RESTAURANT_PHONE || "";
 export const RESTAURANT_EMAIL = import.meta.env.VITE_RESTAURANT_EMAIL || "";
 export const RESTAURANT_ADDRESS = import.meta.env.VITE_RESTAURANT_ADDRESS || "";
+export const ONLINE_ORDER_URL =
+  import.meta.env.VITE_ONLINE_ORDER_URL ||
+  "https://www.eastserve.ca/ordering/restaurant/menu?company_uid=8800cce8-d59d-4def-b06e-bd451cf76a1c&restaurant_uid=3d0c5407-0e17-459b-b406-6267a31734d1&facebook=true";
 
 // ─── Opening Hours ──────────────────────────────────────────
 export const OPENING_HOURS = [
@@ -27,7 +32,7 @@ export const OPENING_HOURS = [
 // ─── Fallback / Placeholder Images ─────────────────────────
 // Real Unsplash photos that match the pub/restaurant theme.
 export const FALLBACK_IMAGE      = "https://images.unsplash.com/photo-1568901346375-23c9450c58cd?w=800&h=600&fit=crop&q=80";   // burger & fries
-export const FALLBACK_HERO       = "https://images.unsplash.com/photo-1514933651103-005eec06c04b?w=1200&h=500&fit=crop&q=80";  // warm bar interior
+export const FALLBACK_HERO       = defaultHeroImage;                                                                         // Jack's Norwood interior
 export const FALLBACK_EVENT      = "https://images.unsplash.com/photo-1501281668745-f7f57925c3b4?w=800&h=600&fit=crop&q=80";   // live music / event
 export const FALLBACK_TEAM       = "https://images.unsplash.com/photo-1577219491135-ce391730fb2c?w=400&h=400&fit=crop&q=80";    // chef portrait
 export const FALLBACK_GALLERY    = "https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=800&h=600&fit=crop&q=80";   // restaurant interior

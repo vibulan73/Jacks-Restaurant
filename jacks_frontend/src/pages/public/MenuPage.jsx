@@ -5,14 +5,11 @@ import { FaFire, FaLeaf } from 'react-icons/fa';
 import { menuAPI, resolveImageUrl } from '../../services/api';
 import LoadingSpinner from '../../components/ui/LoadingSpinner';
 import { FALLBACK_IMAGE } from "../../config/constants";
+import { toSlug } from '../../utils/slug';
 
 const FALLBACK = FALLBACK_IMAGE;
 const FALLBACK_BANNER = FALLBACK_IMAGE;
 
-
-function toSlug(name = '') {
-  return name.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '');
-}
 
 // ── Single item card ──────────────────────────────────────────────────────────
 function ItemCard({ item }) {
@@ -62,6 +59,7 @@ function ItemCard({ item }) {
 export default function MenuPage() {
   const [searchParams, setSearchParams] = useSearchParams();
   const categorySlug = searchParams.get('category');
+  const normalizedCategorySlug = toSlug(categorySlug || '');
 
   const [categories, setCategories]     = useState([]);
   const [subcategories, setSubcategories] = useState([]);
@@ -81,15 +79,19 @@ export default function MenuPage() {
   // ── 2. Derive the active category from the URL slug ───────────────────────
   const activeCategory = useMemo(() => {
     if (!categories.length) return null;
-    return categories.find(c => toSlug(c.name) === categorySlug) || categories[0];
-  }, [categories, categorySlug]);
+    return categories.find(c =>
+      String(c.id) === categorySlug || toSlug(c.name) === normalizedCategorySlug
+    ) || categories[0];
+  }, [categories, categorySlug, normalizedCategorySlug]);
 
   // ── 3. If no slug in URL, write the default (first category) ─────────────
   useEffect(() => {
-    if (activeCategory && !categorySlug) {
-      setSearchParams({ category: toSlug(activeCategory.name) }, { replace: true });
+    if (!activeCategory) return;
+    const activeSlug = toSlug(activeCategory.name);
+    if (activeSlug !== normalizedCategorySlug) {
+      setSearchParams({ category: activeSlug }, { replace: true });
     }
-  }, [activeCategory, categorySlug]);
+  }, [activeCategory, normalizedCategorySlug, setSearchParams]);
 
   // ── 4. Load items + subcategories for the active category ────────────────
   useEffect(() => {
@@ -161,6 +163,9 @@ export default function MenuPage() {
   };
 
   const hasSubcategories = subcategories.length > 0;
+  const selectCategory = (category) => {
+    setSearchParams({ category: toSlug(category.name) });
+  };
 
   // ── Sidebar button style ───────────────────────────────────────────────────
   const sideBtnCls = (id) =>
@@ -205,6 +210,28 @@ export default function MenuPage() {
 
 {/* ── Content ────────────────────────────────────────────────────────── */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
+        {categories.length > 1 && (
+          <div className="mb-8 flex gap-2 overflow-x-auto pb-2">
+            {categories.map((category) => {
+              const isActive = activeCategory?.id === category.id;
+              return (
+                <button
+                  key={category.id}
+                  type="button"
+                  onClick={() => selectCategory(category)}
+                  className={`flex-shrink-0 rounded-full border px-4 py-2 text-sm font-semibold transition-colors ${
+                    isActive
+                      ? 'bg-pub-gold border-pub-gold text-white'
+                      : 'bg-white border-stone-200 text-stone-600 hover:border-pub-gold/40 hover:text-pub-gold'
+                  }`}
+                >
+                  {category.name}
+                </button>
+              );
+            })}
+          </div>
+        )}
+
         {loading ? (
           <LoadingSpinner />
         ) : sections.length === 0 ? (

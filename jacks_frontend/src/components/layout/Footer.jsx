@@ -6,6 +6,7 @@ import { FaTiktok } from 'react-icons/fa6';
 import logoImg from '../../assets/images/JN L 2.png';
 import { settingsAPI, newsletterAPI } from '../../services/api';
 import {
+  ONLINE_ORDER_URL,
   RESTAURANT_ADDRESS,
   RESTAURANT_PHONE,
   RESTAURANT_EMAIL,
@@ -16,7 +17,7 @@ const quickLinks = [
   { to: "/menu", label: "Menu" },
   { to: "/promotions", label: "Specials" },
   { to: "/events", label: "Events" },
-  { to: "/reservation", label: "Book a Table" },
+  { href: ONLINE_ORDER_URL, label: "Online Order" },
   { to: "/gallery", label: "Gallery" },
   { to: "/about", label: "About Us" },
   { to: "/contact", label: "Contact" },
@@ -76,7 +77,7 @@ export default function Footer() {
               className="h-20 w-auto object-contain mb-4"
             />
             <p className="text-stone-500 text-sm leading-relaxed mb-6">
-              Your neighbourhood pub & restaurant in Norwood. Great food, cold
+              Your neighbourhood pub &amp; restaurant in Norwood. Great food, cold
               drinks, live entertainment and warm hospitality.
             </p>
             <div className="flex gap-3">
@@ -108,7 +109,7 @@ export default function Footer() {
                   onClick={!href ? (e) => e.preventDefault() : undefined}
                   aria-label={label}
                   title={
-                    href ? label : `${label} — add URL in Admin → Settings`
+                    href ? label : `${label} - add URL in Admin -> Settings`
                   }
                   className={`w-10 h-10 ${color} rounded-full flex items-center justify-center text-white shadow-sm transition-all duration-300 ${!href ? "opacity-50 cursor-not-allowed" : "hover:scale-110 hover:shadow-md cursor-pointer"}`}
                 >
@@ -125,14 +126,26 @@ export default function Footer() {
             </h3>
             <ul className="space-y-2">
               {quickLinks.map((link) => (
-                <li key={link.to}>
-                  <Link
-                    to={link.to}
-                    className="text-stone-500 text-sm hover:text-pub-gold transition-colors duration-200 flex items-center gap-2"
-                  >
-                    <span className="w-1 h-1 bg-pub-gold rounded-full"></span>
-                    {link.label}
-                  </Link>
+                <li key={link.href || link.to}>
+                  {link.href ? (
+                    <a
+                      href={link.href}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-stone-500 text-sm hover:text-pub-gold transition-colors duration-200 flex items-center gap-2"
+                    >
+                      <span className="w-1 h-1 bg-pub-gold rounded-full"></span>
+                      {link.label}
+                    </a>
+                  ) : (
+                    <Link
+                      to={link.to}
+                      className="text-stone-500 text-sm hover:text-pub-gold transition-colors duration-200 flex items-center gap-2"
+                    >
+                      <span className="w-1 h-1 bg-pub-gold rounded-full"></span>
+                      {link.label}
+                    </Link>
+                  )}
                 </li>
               ))}
             </ul>

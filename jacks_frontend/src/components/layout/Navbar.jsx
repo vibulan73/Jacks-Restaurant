@@ -4,18 +4,38 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { HiMenu, HiX, HiChevronDown } from 'react-icons/hi';
 import { FaSun, FaStar } from 'react-icons/fa';
 import logoImg from '../../assets/images/JN L 2.png';
+import { menuAPI } from '../../services/api';
+import { ONLINE_ORDER_URL } from '../../config/constants';
+import { toSlug } from '../../utils/slug';
 
-const MENU_CATEGORIES = [
-  { label: 'Main Menu',   to: '/menu?category=main-menu' },
-  { label: 'Kids Menu',   to: '/menu?category=kids-menu' },
-  { label: 'Desserts',    to: '/menu?category=dessert' },
-  { label: 'Drinks Menu', to: '/menu?category=drinks' },
+const FALLBACK_MENU_CATEGORY_NAMES = [
+  'Breakfast Menu',
+  'Appetizers',
+  'Poutines',
+  'Nachos',
+  'Soups & Salads',
+  'Burgers',
+  'Pastas',
+  'Pizza',
+  'Sandwiches',
+  'Wraps',
+  "Jack's Favourites",
+  'Rice Bowls',
+  'Norwood Entrees',
+  'Ribs & Wings',
 ];
 
 const SPECIALS_ITEMS = [
   { icon: FaSun,  to: '/promotions?type=DAILY',   label: 'Daily Specials' },
   { icon: FaStar, to: '/promotions?type=SPECIAL', label: 'Featured Specials' },
 ];
+
+const toMenuLink = (name) => ({
+  label: name,
+  to: `/menu?category=${encodeURIComponent(toSlug(name))}`,
+});
+
+const FALLBACK_MENU_CATEGORIES = FALLBACK_MENU_CATEGORY_NAMES.map(toMenuLink);
 
 function DropdownNav({ label, to, items }) {
   const [open, setOpen] = useState(false);
@@ -31,8 +51,8 @@ function DropdownNav({ label, to, items }) {
         setPinned(false);
       }
     };
-    document.addEventListener('mousedown', handler);
-    return () => document.removeEventListener('mousedown', handler);
+    document.addEventListener('pointerdown', handler);
+    return () => document.removeEventListener('pointerdown', handler);
   }, []);
 
   useEffect(() => { setPinned(false); setOpen(false); }, [location]);
@@ -47,7 +67,9 @@ function DropdownNav({ label, to, items }) {
       onMouseLeave={() => setOpen(false)}
     >
       <button
+        type="button"
         onClick={() => setPinned(p => !p)}
+        aria-expanded={isOpen}
         className={`group flex items-center gap-1 text-sm font-semibold tracking-wide uppercase transition-colors duration-200 ${
           isActive ? 'text-pub-gold' : 'text-stone-600 hover:text-pub-gold'
         }`}
@@ -69,7 +91,7 @@ function DropdownNav({ label, to, items }) {
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 10, scale: 0.97 }}
             transition={{ duration: 0.16 }}
-            className="absolute top-full left-1/2 -translate-x-1/2 mt-4 w-52 bg-white border border-stone-100 rounded-2xl shadow-xl shadow-amber-900/10 overflow-hidden z-50"
+            className="absolute top-full left-1/2 -translate-x-1/2 mt-4 w-56 max-h-[70vh] overflow-y-auto bg-white border border-stone-100 rounded-2xl shadow-xl shadow-amber-900/10 z-50"
           >
             {/* Gold top accent bar */}
             <div className="h-0.5 bg-gradient-to-r from-pub-gold/60 via-pub-gold to-pub-gold/60" />
@@ -94,7 +116,26 @@ export default function Navbar() {
   const [isOpen, setIsOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const [mobileMenu, setMobileMenu] = useState(null);
+  const [menuItems, setMenuItems] = useState(FALLBACK_MENU_CATEGORIES);
   const location = useLocation();
+
+  useEffect(() => {
+    let cancelled = false;
+
+    menuAPI
+      .getCategories()
+      .then((r) => {
+        if (cancelled || !Array.isArray(r.data) || r.data.length === 0) return;
+        setMenuItems(r.data.map((category) => toMenuLink(category.name)));
+      })
+      .catch(() => {
+        if (!cancelled) setMenuItems(FALLBACK_MENU_CATEGORIES);
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   useEffect(() => {
     const handleScroll = () => setScrolled(window.scrollY > 50);
@@ -144,7 +185,7 @@ export default function Navbar() {
               )}
             </NavLink>
 
-            <DropdownNav label="Menu" to="/menu" items={MENU_CATEGORIES} />
+            <DropdownNav label="Menu" to="/menu" items={menuItems} />
             <DropdownNav label="Specials" to="/promotions" items={SPECIALS_ITEMS} />
 
             {[
@@ -172,19 +213,22 @@ export default function Navbar() {
             ))}
           </div>
 
-          {/* Book a Table CTA */}
-          <Link
-            to="/reservation"
+          {/* Online order CTA */}
+          <a
+            href={ONLINE_ORDER_URL}
+            target="_blank"
+            rel="noopener noreferrer"
             className="hidden lg:inline-flex items-center flex-shrink-0 whitespace-nowrap px-5 py-2.5 rounded-full bg-pub-gold text-white text-sm font-bold tracking-wide uppercase shadow-sm shadow-pub-gold/40 hover:bg-amber-700 hover:shadow-md hover:shadow-pub-gold/30 active:scale-95 transition-all duration-200 ml-1 mr-1"
           >
-            Book a Table
-          </Link>
+            Online Order
+          </a>
 
           {/* Mobile Hamburger */}
           <button
             onClick={() => setIsOpen(!isOpen)}
             className="lg:hidden ml-auto flex items-center justify-center w-9 h-9 rounded-full hover:bg-stone-100 text-stone-700 transition-colors duration-200"
             aria-label="Toggle menu"
+            aria-expanded={isOpen}
           >
             {isOpen ? <HiX size={20} /> : <HiMenu size={20} />}
           </button>
@@ -213,7 +257,7 @@ export default function Navbar() {
                 active={mobileMenu}
                 onToggle={(id) => setMobileMenu(mobileMenu === id ? null : id)}
               >
-                {MENU_CATEGORIES.map(item => (
+                {menuItems.map(item => (
                   <Link key={item.to} to={item.to} className="text-sm text-stone-500 hover:text-pub-gold py-2 border-b border-stone-100 last:border-b-0">
                     {item.label}
                   </Link>
@@ -247,12 +291,14 @@ export default function Navbar() {
               ))}
 
               {/* Mobile CTA */}
-              <Link
-                to="/reservation"
+              <a
+                href={ONLINE_ORDER_URL}
+                target="_blank"
+                rel="noopener noreferrer"
                 className="mt-3 flex items-center justify-center px-5 py-3 rounded-full bg-pub-gold text-white text-sm font-bold tracking-wide uppercase shadow-sm shadow-pub-gold/30 hover:bg-amber-700 transition-colors duration-200"
               >
-                Book a Table
-              </Link>
+                Online Order
+              </a>
             </div>
           </motion.div>
         )}
@@ -265,7 +311,9 @@ function MobileAccordion({ label, id, active, onToggle, children }) {
   return (
     <div>
       <button
+        type="button"
         onClick={() => onToggle(id)}
+        aria-expanded={active === id}
         className="w-full flex items-center justify-between text-sm font-semibold uppercase tracking-wide py-2.5 border-b border-stone-200 text-stone-700"
       >
         {label}
